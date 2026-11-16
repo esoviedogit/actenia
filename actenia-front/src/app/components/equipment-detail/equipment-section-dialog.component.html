@@ -1,0 +1,314 @@
+<header mat-dialog-title class="dialog-title">
+  <div>
+    <span class="dialog-eyebrow">EDITAR ACTIVO</span>
+    <h2>{{ title }}</h2>
+  </div>
+  <button mat-icon-button type="button" aria-label="Cerrar" (click)="close()">
+    <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content>
+  <p *ngIf="errorMessage()" class="dialog-error" role="alert">{{ errorMessage() }}</p>
+  <form [formGroup]="data.form" (ngSubmit)="submit()">
+    <ng-container [ngSwitch]="data.section">
+      <div *ngSwitchCase="'general'" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre del activo</mat-label>
+          <input matInput formControlName="nombre" maxlength="150" />
+          <mat-error *ngIf="data.form.get('nombre')?.hasError('required')"
+            >El nombre es obligatorio.</mat-error
+          >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Número de inventario</mat-label>
+          <input matInput formControlName="numero_inventario" maxlength="50" />
+          <mat-error *ngIf="data.form.get('numero_inventario')?.hasError('required')"
+            >El inventario es obligatorio.</mat-error
+          >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de equipo</mat-label>
+          <mat-select formControlName="tipo_equipo_id">
+            <mat-option value="">Sin tipo</mat-option>
+            <mat-option *ngFor="let type of data.equipmentTypes" [value]="type.id">
+              {{ type.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Marca</mat-label>
+          <input matInput formControlName="marca" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Modelo</mat-label>
+          <input matInput formControlName="modelo" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Serie</mat-label>
+          <input matInput formControlName="serial" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fabricante</mat-label>
+          <input matInput formControlName="fabricante" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de adquisición</mat-label>
+          <input matInput type="date" formControlName="fecha_adquisicion" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Garantía</mat-label>
+          <input matInput formControlName="garantia_periodo" maxlength="50" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Vida útil (años)</mat-label>
+          <input matInput type="number" min="1" formControlName="vida_util_anios" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Clasificación INVIMA</mat-label>
+          <mat-select formControlName="clasificacion_riesgo_invima">
+            <mat-option [value]="null">No aplica</mat-option>
+            <mat-option value="I">Clase I</mat-option>
+            <mat-option value="IIa">Clase IIa</mat-option>
+            <mat-option value="IIb">Clase IIb</mat-option>
+            <mat-option value="III">Clase III</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Registro sanitario</mat-label>
+          <input matInput formControlName="registro_sanitario_invima" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option value="EN USO">EN USO</mat-option>
+            <mat-option value="EN MANTENIMIENTO">EN MANTENIMIENTO</mat-option>
+            <mat-option value="DE BAJA">DE BAJA</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="full-width image-upload">
+          <label for="equipment-image">Fotografía del activo</label>
+          <input
+            id="equipment-image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            (change)="onImageSelected($event)"
+          />
+          <span>JPG, PNG, WebP, GIF o AVIF. Máximo 5 MB.</span>
+          <img *ngIf="imageUrl()" [src]="imageUrl()" alt="Vista previa del activo" />
+        </div>
+      </div>
+
+      <div *ngSwitchCase="'technical'" class="form-grid">
+        <div class="full-width nested-group" formGroupName="especificaciones_electricas">
+          <h3>Especificaciones eléctricas</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Voltaje</mat-label><input matInput formControlName="voltaje" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Frecuencia</mat-label><input matInput formControlName="frecuencia" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Potencia</mat-label><input matInput formControlName="potencia" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Amperaje</mat-label><input matInput formControlName="amperaje" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Corriente</mat-label>
+              <mat-select formControlName="corriente">
+                <mat-option value="AC">AC</mat-option>
+                <mat-option value="DC">DC</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox formControlName="usa_bateria">Usa batería</mat-checkbox>
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de batería</mat-label
+              ><input matInput formControlName="tipo_bateria" />
+            </mat-form-field>
+            <mat-checkbox formControlName="usa_adaptador">Usa adaptador</mat-checkbox>
+            <mat-form-field appearance="outline">
+              <mat-label>Voltaje del adaptador</mat-label>
+              <input matInput formControlName="voltaje_adaptador" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Amperaje del adaptador</mat-label>
+              <input matInput formControlName="amperaje_adaptador" />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="full-width nested-group" formGroupName="dimensiones">
+          <h3>Dimensiones</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Peso (kg)</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="peso_kg" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Largo (mm)</mat-label>
+              <input matInput type="number" min="0" formControlName="largo_mm" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Ancho (mm)</mat-label>
+              <input matInput type="number" min="0" formControlName="ancho_mm" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Alto (mm)</mat-label>
+              <input matInput type="number" min="0" formControlName="alto_mm" />
+            </mat-form-field>
+          </div>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>URL del manual</mat-label>
+          <input matInput type="url" formControlName="manual_usuario_url" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>URL del código QR</mat-label>
+          <input matInput type="url" formControlName="qr_code_url" />
+        </mat-form-field>
+      </div>
+
+      <div *ngSwitchCase="'location'" class="form-grid">
+        <p *ngIf="data.locationError()" class="dialog-error full-width" role="alert">
+          {{ data.locationError() }}
+        </p>
+        <mat-form-field appearance="outline">
+          <mat-label>Sede</mat-label>
+          <mat-select formControlName="sede_id" (selectionChange)="data.onSedeChange()">
+            <mat-option value="">Selecciona una sede</mat-option>
+            <mat-option *ngFor="let sede of data.sedes" [value]="sede.id">
+              {{ sede.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Área / consultorio</mat-label>
+          <mat-select
+            formControlName="consultorio_id"
+            [disabled]="!data.form.get('sede_id')?.value || data.loadingLocations()"
+          >
+            <mat-option value="">Selecciona un área</mat-option>
+            <mat-option *ngIf="data.loadingLocations()" disabled>Cargando áreas...</mat-option>
+            <mat-option *ngFor="let location of data.ubicaciones()" [value]="location.id">
+              {{ location.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div *ngSwitchCase="'maintenance'" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Frecuencia de mantenimiento</mat-label>
+          <input matInput formControlName="frecuencia_mantenimiento" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Próximo mantenimiento</mat-label>
+          <input matInput type="date" formControlName="fecha_proximo_mantenimiento" />
+        </mat-form-field>
+        <mat-checkbox formControlName="requiere_calibracion">Requiere calibración</mat-checkbox>
+        <mat-form-field appearance="outline">
+          <mat-label>Frecuencia de calibración</mat-label>
+          <input matInput formControlName="frecuencia_calibracion" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Próxima calibración</mat-label>
+          <input matInput type="date" formControlName="fecha_proxima_calibracion" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput rows="3" formControlName="observaciones"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div *ngSwitchCase="'provider'" class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Proveedor</mat-label>
+          <mat-select formControlName="proveedor_id" (selectionChange)="data.onProviderChange()">
+            <mat-option value="">Sin proveedor</mat-option>
+            <mat-option *ngFor="let provider of data.providers" [value]="provider.id">
+              {{ provider.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" maxlength="150" />
+          <mat-error *ngIf="data.form.get('nombre')?.hasError('required')"
+            >El nombre es obligatorio para guardar un proveedor.</mat-error
+          >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="direccion" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono fijo</mat-label>
+          <input matInput formControlName="telefono_fijo" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Celular</mat-label>
+          <input matInput formControlName="telefono_celular" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput type="email" formControlName="email" />
+          <mat-error *ngIf="data.form.get('email')?.hasError('email')"
+            >Ingresa un correo válido.</mat-error
+          >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Sitio web</mat-label>
+          <input matInput type="url" formControlName="sitio_web" />
+        </mat-form-field>
+      </div>
+
+      <div *ngSwitchCase="'maintenance-entry'" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de intervención</mat-label>
+          <mat-select formControlName="tipo">
+            <mat-option value="MANTENIMIENTO_PREVENTIVO">Mantenimiento preventivo</mat-option>
+            <mat-option value="MANTENIMIENTO_CORRECTIVO">Mantenimiento correctivo</mat-option>
+            <mat-option value="CALIBRACION">Calibración</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha</mat-label>
+          <input matInput type="date" formControlName="fecha" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Próxima fecha</mat-label>
+          <input matInput type="date" formControlName="proxima_fecha" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Proveedor</mat-label>
+          <mat-select formControlName="proveedor_id">
+            <mat-option value="">Sin proveedor</mat-option>
+            <mat-option *ngFor="let provider of data.providers" [value]="provider.id">
+              {{ provider.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Costo</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="costo" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput rows="4" formControlName="descripcion"></textarea>
+          <mat-error *ngIf="data.form.get('descripcion')?.hasError('required')"
+            >La descripción es obligatoria.</mat-error
+          >
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()" [disabled]="saving()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="saving()">
+    <mat-icon fontSet="material-symbols-outlined">save</mat-icon>
+    {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+  </button>
+</mat-dialog-actions>

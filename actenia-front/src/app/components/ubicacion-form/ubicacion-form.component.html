@@ -1,0 +1,80 @@
+<main class="form-page">
+  <header class="form-header">
+    <a class="back-link" routerLink="/ubicaciones">← Volver a ubicaciones</a>
+    <p class="eyebrow">ÁREAS Y ESPACIOS DE TRABAJO</p>
+    <h1>{{ ubicacionId ? 'Editar ubicación' : 'Nueva ubicación' }}</h1>
+    <p>Registra un área clínica o espacio de trabajo asociado a una sede.</p>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loadingForm()" class="loading-state">Cargando información...</div>
+
+  <form *ngIf="!loadingForm()" [formGroup]="ubicacionForm" (ngSubmit)="onSubmit()">
+    <section class="form-section">
+      <h2>Datos de la ubicación</h2>
+      <div class="field-grid">
+        <label>
+          Sede <b>*</b>
+          <select formControlName="sede_id">
+            <option value="">Selecciona una sede</option>
+            <option *ngFor="let sede of sedes()" [value]="sede.id">{{ sede.nombre }}</option>
+          </select>
+          <small
+            *ngIf="ubicacionForm.get('sede_id')?.touched && ubicacionForm.get('sede_id')?.invalid"
+            class="field-error"
+            >Selecciona la sede a la que pertenece esta ubicación.</small
+          >
+          <span *ngIf="sedes().length === 0" class="field-hint">
+            Primero registra una sede para poder crear ubicaciones.
+            <a routerLink="/sedes/nueva">Crear sede</a>
+          </span>
+        </label>
+
+        <label>
+          Nombre del área o ubicación <b>*</b>
+          <input
+            type="text"
+            formControlName="nombre"
+            maxlength="150"
+            placeholder="Ej. Terapia Física, Quirófano 2"
+          />
+          <small
+            *ngIf="ubicacionForm.get('nombre')?.touched && ubicacionForm.get('nombre')?.invalid"
+            class="field-error"
+            >El nombre es obligatorio (máximo 150 caracteres).</small
+          >
+        </label>
+
+        <label>
+          Piso
+          <input type="text" formControlName="piso" maxlength="100" placeholder="Ej. Piso 2" />
+        </label>
+
+        <label>
+          Código de servicio
+          <input
+            type="text"
+            formControlName="codigo_servicio"
+            maxlength="50"
+            placeholder="Código opcional para auditoría"
+          />
+          <span class="field-hint"
+            >Opcional; úsalo para identificación interna o habilitación.</span
+          >
+        </label>
+      </div>
+      <p class="required-note"><b>*</b> Campos obligatorios</p>
+    </section>
+
+    <footer class="form-actions">
+      <a class="button button-secondary" routerLink="/ubicaciones">Cancelar</a>
+      <button
+        class="button button-primary"
+        type="submit"
+        [disabled]="loading() || sedes().length === 0"
+      >
+        {{ loading() ? 'Guardando…' : ubicacionId ? 'Guardar cambios' : 'Guardar ubicación' }}
+      </button>
+    </footer>
+  </form>
+</main>

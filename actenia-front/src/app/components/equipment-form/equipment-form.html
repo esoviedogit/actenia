@@ -1,0 +1,305 @@
+<main class="form-page">
+  <header class="form-header">
+    <a class="back-link" routerLink="/equipment-list">← Volver a activos</a>
+    <p class="eyebrow">HOJA DE VIDA DEL ACTIVO</p>
+    <h1>{{ equipmentId ? 'Editar activo' : 'Registrar activo' }}</h1>
+    <p>
+      Registra la información, ubicación y mantenimiento de cualquier activo de tu organización.
+    </p>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message message-error" role="alert">{{ errorMessage() }}</p>
+  <p *ngIf="successMessage()" class="message message-success" role="status">
+    {{ successMessage() }}
+  </p>
+  <div *ngIf="loadingForm()" class="loading-state">Cargando información del activo...</div>
+
+  <form *ngIf="!loadingForm()" [formGroup]="equipmentForm" (ngSubmit)="onSubmit()">
+    <fieldset>
+      <legend><span>01</span> Identificación del activo</legend>
+      <div class="field-grid">
+        <label
+          >Nombre del activo <b>*</b>
+          <input
+            formControlName="nombre"
+            maxlength="150"
+            placeholder="Ej. Monitor de signos vitales, Impresora recepción"
+          />
+          <small
+            *ngIf="equipmentForm.get('nombre')?.touched && equipmentForm.get('nombre')?.invalid"
+            >Ingresa el nombre del activo (máximo 150 caracteres).</small
+          >
+        </label>
+        <label
+          >Número de inventario <b>*</b>
+          <input formControlName="numero_inventario" maxlength="50" placeholder="Ej. ACT-001" />
+          <small
+            *ngIf="
+              equipmentForm.get('numero_inventario')?.touched &&
+              equipmentForm.get('numero_inventario')?.invalid
+            "
+            >El número de inventario es obligatorio (máximo 50 caracteres).</small
+          >
+        </label>
+        <label
+          >Tipo de activo <b>*</b>
+          <select formControlName="tipo_equipo_id" (change)="onEquipmentTypeChange($event)">
+            <option value="">Selecciona un tipo</option>
+            <option *ngFor="let tipo of tiposEquipo()" [value]="tipo.id">
+              {{ tipo.nombre }}
+            </option>
+          </select>
+          <small
+            *ngIf="
+              equipmentForm.get('tipo_equipo_id')?.touched &&
+              equipmentForm.get('tipo_equipo_id')?.hasError('required')
+            "
+            >Selecciona el tipo de activo.</small
+          >
+          <small *ngIf="tiposEquipo().length === 0">
+            No hay tipos disponibles.
+            <a routerLink="/tipos-equipo/nuevo">Registrar tipo de equipo</a>
+          </small>
+          <span *ngIf="selectedEquipmentType()" class="selected-type-preview" aria-live="polite">
+            <img
+              *ngIf="selectedEquipmentType()?.imagen_url; else defaultTypePreview"
+              [src]="selectedEquipmentType()?.imagen_url"
+              [alt]="'Imagen de ' + selectedEquipmentType()?.nombre"
+            />
+            <ng-template #defaultTypePreview>
+              <span class="selected-type-icon" aria-hidden="true">▦</span>
+            </ng-template>
+            <span>{{ selectedEquipmentType()?.nombre }}</span>
+          </span>
+        </label>
+        <label>Marca<input formControlName="marca" maxlength="100" placeholder="Marca" /></label>
+        <label>Modelo<input formControlName="modelo" maxlength="100" placeholder="Modelo" /></label>
+        <label
+          >Serial<input formControlName="serial" maxlength="100" placeholder="Número de serie"
+        /></label>
+        <label
+          >Fabricante<input formControlName="fabricante" maxlength="100" placeholder="Fabricante"
+        /></label>
+        <label>Fecha de adquisición<input type="date" formControlName="fecha_adquisicion" /></label>
+        <label
+          >Garantía<input
+            formControlName="garantia_periodo"
+            maxlength="50"
+            placeholder="Ej. 2 años"
+        /></label>
+        <label
+          >Vida útil (años)<input type="number" min="1" formControlName="vida_util_anios"
+        /></label>
+        <label
+          >Estado
+          <select formControlName="estado">
+            <option value="EN USO">EN USO</option>
+            <option value="EN MANTENIMIENTO">EN MANTENIMIENTO</option>
+            <option value="DE BAJA">DE BAJA</option>
+          </select>
+        </label>
+        <label
+          >Clasificación de riesgo INVIMA (solo si aplica)
+          <select formControlName="clasificacion_riesgo_invima">
+            <option value="">No aplica</option>
+            <option value="I">Clase I</option>
+            <option value="IIa">Clase IIa</option>
+            <option value="IIb">Clase IIb</option>
+            <option value="III">Clase III</option>
+          </select>
+        </label>
+        <label
+          >Registro sanitario INVIMA (solo si aplica)
+          <input
+            formControlName="registro_sanitario_invima"
+            maxlength="100"
+            placeholder="Número de registro"
+          />
+          <small
+            *ngIf="
+              equipmentForm.get('registro_sanitario_invima')?.touched &&
+              equipmentForm.get('registro_sanitario_invima')?.invalid
+            "
+            >Usa letras, números, punto, barra o guion (máximo 100 caracteres).</small
+          >
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="especificaciones_electricas">
+      <legend><span>02</span> Especificaciones técnicas (si aplica)</legend>
+      <div class="field-grid">
+        <label>Voltaje<input formControlName="voltaje" placeholder="Ej. 110V" /></label>
+        <label>Frecuencia<input formControlName="frecuencia" placeholder="Ej. 60 Hz" /></label>
+        <label>Potencia<input formControlName="potencia" placeholder="Ej. 100 W" /></label>
+        <label>Amperaje<input formControlName="amperaje" placeholder="Ej. 2 A" /></label>
+        <label
+          >Corriente
+          <select formControlName="corriente">
+            <option value="AC">AC</option>
+            <option value="DC">DC</option>
+          </select>
+        </label>
+        <div class="check-group">
+          <label class="checkbox"
+            ><input type="checkbox" formControlName="usa_bateria" /> Usa batería</label
+          >
+          <label class="checkbox"
+            ><input type="checkbox" formControlName="usa_adaptador" /> Usa adaptador</label
+          >
+        </div>
+        <label
+          >Tipo de batería<input formControlName="tipo_bateria" placeholder="Ej. Ion de litio"
+        /></label>
+        <label
+          >Voltaje del adaptador<input formControlName="voltaje_adaptador" placeholder="Ej. 12 V"
+        /></label>
+        <label
+          >Amperaje del adaptador<input formControlName="amperaje_adaptador" placeholder="Ej. 2 A"
+        /></label>
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="dimensiones">
+      <h3>Dimensiones</h3>
+      <div class="field-grid dimensions">
+        <label
+          >Peso (kg)<input type="number" min="0" step="0.01" formControlName="peso_kg"
+        /></label>
+        <label>Largo (mm)<input type="number" min="0" formControlName="largo_mm" /></label>
+        <label>Ancho (mm)<input type="number" min="0" formControlName="ancho_mm" /></label>
+        <label>Alto (mm)<input type="number" min="0" formControlName="alto_mm" /></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span>03</span> Ubicación y proveedor</legend>
+      <div class="field-grid">
+        <label
+          >Sede <b>*</b>
+          <select formControlName="sede_id" (change)="onSedeChange()">
+            <option value="">Selecciona una sede</option>
+            <option *ngFor="let sede of sedes()" [value]="sede.id">{{ sede.nombre }}</option>
+          </select>
+          <small
+            *ngIf="
+              equipmentForm.get('sede_id')?.touched &&
+              equipmentForm.get('sede_id')?.hasError('required')
+            "
+            >Selecciona una sede.</small
+          >
+          <small *ngIf="sedes().length === 0">
+            No hay sedes disponibles. <a routerLink="/sedes/nueva">Registrar sede</a>
+          </small>
+        </label>
+        <label class="full-width">
+          Fotografía del activo
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            (change)="onImageSelected($event)"
+          />
+          <small>JPG, PNG, WebP, GIF o AVIF. Tamaño máximo: 5 MB.</small>
+          <img
+            *ngIf="imagePreviewUrl()"
+            class="asset-image-preview"
+            [src]="imagePreviewUrl()"
+            [alt]="'Vista previa de ' + (equipmentForm.get('nombre')?.value || 'el activo')"
+          />
+        </label>
+        <label
+          >Ubicación o área <b>*</b>
+          <select
+            formControlName="consultorio_id"
+            [disabled]="loadingUbicaciones() || !equipmentForm.get('sede_id')?.value"
+          >
+            <option value="">
+              {{ loadingUbicaciones() ? 'Cargando ubicaciones...' : 'Selecciona una ubicación' }}
+            </option>
+            <option *ngFor="let ubicacion of ubicaciones()" [value]="ubicacion.id">
+              {{ ubicacion.nombre }}{{ ubicacion.piso ? ' · ' + ubicacion.piso : '' }}
+            </option>
+          </select>
+          <small
+            *ngIf="
+              equipmentForm.get('consultorio_id')?.touched &&
+              equipmentForm.get('consultorio_id')?.hasError('required')
+            "
+            >Selecciona una ubicación o área.</small
+          >
+          <small
+            *ngIf="
+              !loadingUbicaciones() &&
+              ubicaciones().length === 0 &&
+              equipmentForm.get('sede_id')?.value
+            "
+          >
+            No hay ubicaciones registradas para esta sede.
+            <a routerLink="/ubicaciones/nueva">Crear ubicación</a>
+          </small>
+        </label>
+        <label
+          >Proveedor
+          <select formControlName="proveedor_id">
+            <option value="">Selecciona un proveedor</option>
+            <option *ngFor="let proveedor of catalogs.proveedores" [value]="proveedor.id">
+              {{ proveedor.nombre }}
+            </option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span>04</span> Mantenimiento y cumplimiento</legend>
+      <div class="field-grid">
+        <label
+          >Frecuencia de mantenimiento<input
+            formControlName="frecuencia_mantenimiento"
+            placeholder="Ej. TRIMESTRAL"
+        /></label>
+        <label
+          >Próximo mantenimiento<input type="date" formControlName="fecha_proximo_mantenimiento"
+        /></label>
+        <label class="checkbox calibration"
+          ><input type="checkbox" formControlName="requiere_calibracion" /> Requiere
+          calibración</label
+        >
+        <label
+          >Frecuencia de calibración<input
+            formControlName="frecuencia_calibracion"
+            placeholder="Ej. ANUAL"
+        /></label>
+        <label
+          >Próxima calibración<input type="date" formControlName="fecha_proxima_calibracion"
+        /></label>
+        <label
+          >URL del manual<input
+            type="url"
+            formControlName="manual_usuario_url"
+            placeholder="https://..."
+        /></label>
+        <label
+          >URL del código QR<input
+            type="url"
+            formControlName="qr_code_url"
+            placeholder="https://..."
+        /></label>
+        <label class="full-width"
+          >Observaciones<textarea
+            rows="3"
+            formControlName="observaciones"
+            placeholder="Notas relevantes del activo"
+          ></textarea>
+        </label>
+      </div>
+    </fieldset>
+
+    <footer class="form-actions">
+      <a class="button button-secondary" routerLink="/equipment-list">Cancelar</a>
+      <button class="button button-primary" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Guardando…' : equipmentId ? 'Guardar cambios' : 'Registrar activo' }}
+      </button>
+    </footer>
+  </form>
+</main>

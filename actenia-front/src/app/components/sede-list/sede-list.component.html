@@ -1,0 +1,48 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">UBICACIONES DE TU INSTITUCIÓN</p>
+      <h1>Sedes</h1>
+      <p class="subtitle">Administra las sedes y sus datos de habilitación.</p>
+    </div>
+    <a class="button button-primary" routerLink="/sedes/nueva">+ Agregar sede</a>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loading()" class="empty-state">Cargando sedes...</div>
+  <div *ngIf="!loading() && !errorMessage() && sedes().length === 0" class="empty-state">
+    <span class="empty-icon">⌖</span>
+    <strong>Aún no tienes sedes registradas</strong>
+    <span>Agrega una sede para asignar equipos y consultorios.</span>
+    <a class="button button-primary" routerLink="/sedes/nueva">Registrar primera sede</a>
+  </div>
+
+  <section
+    *ngIf="!loading() && sedes().length > 0"
+    class="sede-grid"
+    aria-label="Sedes registradas"
+  >
+    <article class="sede-card" *ngFor="let sede of sedes()">
+      <div class="card-icon" aria-hidden="true">⌖</div>
+      <div class="card-content">
+        <div class="card-heading">
+          <div>
+            <h2>{{ sede.nombre }}</h2>
+            <p class="city">{{ sede.ciudad || 'Ciudad sin registrar' }}</p>
+          </div>
+          <a
+            class="edit-link"
+            [routerLink]="['/sedes/editar', sede.id]"
+            [attr.aria-label]="'Editar sede ' + sede.nombre"
+            >Editar</a
+          >
+        </div>
+        <p *ngIf="sede.direccion" class="detail">{{ sede.direccion }}</p>
+        <p *ngIf="sede.telefono" class="detail">{{ sede.telefono }}</p>
+        <p *ngIf="sede.codigo_habilitacion" class="reps">
+          <span>CÓDIGO REPS</span>{{ sede.codigo_habilitacion }}
+        </p>
+      </div>
+    </article>
+  </section>
+</main>

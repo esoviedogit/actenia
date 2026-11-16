@@ -1,0 +1,69 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">DIRECTORIO DE CONTACTOS</p>
+      <h1>Proveedores</h1>
+      <p class="subtitle">Administra los proveedores de servicios y activos de tu organización.</p>
+    </div>
+    <a class="button button-primary" routerLink="/proveedores/nuevo">+ Agregar proveedor</a>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loading()" class="empty-state" aria-live="polite">Cargando proveedores...</div>
+  <div *ngIf="!loading() && !errorMessage() && proveedores().length === 0" class="empty-state">
+    <span class="empty-icon" aria-hidden="true">♧</span>
+    <strong>Aún no tienes proveedores registrados</strong>
+    <span>Registra un proveedor para asociarlo a tus activos.</span>
+    <a class="button button-primary" routerLink="/proveedores/nuevo">Registrar primer proveedor</a>
+  </div>
+
+  <section
+    *ngIf="!loading() && proveedores().length > 0"
+    class="provider-grid"
+    aria-label="Proveedores registrados"
+  >
+    <article class="provider-card" *ngFor="let proveedor of proveedores()">
+      <div class="card-icon" aria-hidden="true">♧</div>
+      <div class="card-content">
+        <div class="card-heading">
+          <h2>{{ proveedor.nombre }}</h2>
+          <a
+            class="edit-link"
+            [routerLink]="['/proveedores/editar', proveedor.id]"
+            [attr.aria-label]="'Editar proveedor ' + proveedor.nombre"
+            >Editar</a
+          >
+        </div>
+        <p *ngIf="proveedor.direccion" class="detail">{{ proveedor.direccion }}</p>
+        <p *ngIf="proveedor.telefono_fijo || proveedor.telefono_celular" class="detail">
+          {{ proveedor.telefono_fijo }}
+          <span *ngIf="proveedor.telefono_fijo && proveedor.telefono_celular"> · </span>
+          {{ proveedor.telefono_celular }}
+        </p>
+        <a *ngIf="proveedor.email" class="detail contact-link" [href]="'mailto:' + proveedor.email">
+          {{ proveedor.email }}
+        </a>
+        <a
+          *ngIf="proveedor.sitio_web"
+          class="detail contact-link"
+          [href]="proveedor.sitio_web"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ proveedor.sitio_web }}</a
+        >
+        <p
+          *ngIf="
+            !proveedor.direccion &&
+            !proveedor.telefono_fijo &&
+            !proveedor.telefono_celular &&
+            !proveedor.email &&
+            !proveedor.sitio_web
+          "
+          class="detail muted"
+        >
+          Sin datos de contacto adicionales.
+        </p>
+      </div>
+    </article>
+  </section>
+</main>

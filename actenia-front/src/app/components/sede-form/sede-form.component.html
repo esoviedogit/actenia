@@ -1,0 +1,113 @@
+<main class="form-page">
+  <header class="form-header">
+    <a class="back-link" routerLink="/sedes">← Volver a sedes</a>
+    <p class="eyebrow">UBICACIONES DE TU INSTITUCIÓN</p>
+    <h1>{{ sedeId ? 'Editar sede' : 'Agregar sede' }}</h1>
+    <p>Registra la información de ubicación y habilitación del prestador.</p>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loadingSede()" class="loading-state">Cargando sede...</div>
+
+  <form *ngIf="!loadingSede()" [formGroup]="sedeForm" (ngSubmit)="onSubmit()">
+    <section class="form-section">
+      <h2>Datos de la sede</h2>
+      <div class="field-grid">
+        <label>
+          Nombre de la sede <b>*</b>
+          <input
+            type="text"
+            formControlName="nombre"
+            maxlength="150"
+            autocomplete="organization"
+            placeholder="Ej. Sede Principal"
+          />
+          <small
+            *ngIf="sedeForm.get('nombre')?.touched && sedeForm.get('nombre')?.invalid"
+            class="field-error"
+            >El nombre es obligatorio (máximo 150 caracteres).</small
+          >
+        </label>
+
+        <label>
+          Ciudad <b>*</b>
+          <input
+            type="text"
+            formControlName="ciudad"
+            maxlength="100"
+            autocomplete="address-level2"
+            placeholder="Ej. Bogotá"
+          />
+          <small
+            *ngIf="sedeForm.get('ciudad')?.touched && sedeForm.get('ciudad')?.invalid"
+            class="field-error"
+            >La ciudad es obligatoria (máximo 100 caracteres).</small
+          >
+        </label>
+
+        <label>
+          Dirección
+          <input
+            type="text"
+            formControlName="direccion"
+            maxlength="500"
+            autocomplete="street-address"
+            placeholder="Dirección de la sede"
+          />
+        </label>
+
+        <label>
+          Teléfono
+          <input
+            type="tel"
+            formControlName="telefono"
+            maxlength="50"
+            autocomplete="tel"
+            placeholder="Teléfono de contacto"
+          />
+        </label>
+
+        <label>
+          Código de habilitación REPS
+          <input
+            type="text"
+            formControlName="codigo_habilitacion"
+            maxlength="50"
+            placeholder="Código registrado en REPS"
+            aria-describedby="reps-help reps-error"
+          />
+          <span id="reps-help" class="field-hint"
+            >Dato de referencia para auditoría de habilitación.</span
+          >
+          <small
+            id="reps-error"
+            *ngIf="
+              sedeForm.get('codigo_habilitacion')?.touched &&
+              sedeForm.get('codigo_habilitacion')?.invalid
+            "
+            class="field-error"
+            >Usa letras, números, punto, barra o guion (máximo 50 caracteres).</small
+          >
+        </label>
+
+        <label>
+          Institución / IPS
+          <input
+            type="text"
+            formControlName="empresa"
+            maxlength="150"
+            placeholder="Nombre de la institución"
+          />
+        </label>
+      </div>
+      <p class="required-note"><b>*</b> Campos obligatorios</p>
+    </section>
+
+    <footer class="form-actions">
+      <a class="button button-secondary" routerLink="/sedes">Cancelar</a>
+      <button class="button button-primary" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Guardando…' : sedeId ? 'Guardar cambios' : 'Guardar sede' }}
+      </button>
+    </footer>
+  </form>
+</main>

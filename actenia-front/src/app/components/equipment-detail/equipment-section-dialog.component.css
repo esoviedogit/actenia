@@ -1,0 +1,117 @@
+:host {
+  display: block;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 8px 8px 18px 24px;
+}
+
+.dialog-title h2 {
+  margin: 4px 0 0;
+  color: #203b46;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.dialog-eyebrow {
+  color: #147d73;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+
+mat-dialog-content {
+  max-height: min(68vh, 680px);
+  padding: 0 24px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 4px 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.nested-group {
+  padding-top: 6px;
+}
+
+.nested-group h3 {
+  margin: 8px 0 12px;
+  color: #3c5159;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nested-group + .nested-group {
+  margin-top: 8px;
+  border-top: 1px solid #e6ecee;
+}
+
+mat-checkbox {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.image-upload {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 18px;
+  color: #465c65;
+  font-size: 13px;
+}
+
+.image-upload input {
+  max-width: 100%;
+}
+
+.image-upload span {
+  color: #73828a;
+  font-size: 12px;
+}
+
+.image-upload img {
+  width: min(100%, 260px);
+  max-height: 180px;
+  border: 1px solid #e1e9eb;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.dialog-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff0ef;
+  color: #a63d38;
+  font-size: 13px;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 16px 24px 20px;
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  mat-dialog-content {
+    max-height: 62vh;
+  }
+}

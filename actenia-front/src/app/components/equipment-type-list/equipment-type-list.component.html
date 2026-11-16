@@ -1,0 +1,67 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">CATÁLOGO DE ACTIVOS</p>
+      <h1>Tipos de equipo</h1>
+      <p class="subtitle">
+        Organiza los activos por categoría y define sus pautas de mantenimiento.
+      </p>
+    </div>
+    <a class="button button-primary" routerLink="/tipos-equipo/nuevo">+ Registrar tipo de equipo</a>
+  </header>
+
+  <p *ngIf="successMessage()" class="message-success" role="status">{{ successMessage() }}</p>
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loading()" class="empty-state" aria-live="polite">Cargando tipos de equipo...</div>
+
+  <div *ngIf="!loading() && !errorMessage() && equipmentTypes().length === 0" class="empty-state">
+    <span class="empty-icon" aria-hidden="true">▦</span>
+    <strong>Aún no hay tipos de equipo</strong>
+    <span>Registra una categoría para clasificar tus activos.</span>
+    <a class="button button-primary" routerLink="/tipos-equipo/nuevo">Registrar primer tipo</a>
+  </div>
+
+  <section
+    *ngIf="!loading() && equipmentTypes().length > 0"
+    class="type-grid"
+    aria-label="Tipos de equipo disponibles"
+  >
+    <article class="type-card" *ngFor="let type of equipmentTypes()">
+      <img
+        *ngIf="type.imagen_url; else defaultTypeIcon"
+        class="type-image"
+        [src]="type.imagen_url"
+        [alt]="'Imagen de ' + type.nombre"
+        loading="lazy"
+      />
+      <ng-template #defaultTypeIcon>
+        <div class="type-icon" aria-hidden="true">▦</div>
+      </ng-template>
+      <div class="type-content">
+        <div class="type-heading">
+          <h2>{{ type.nombre }}</h2>
+          <span class="ownership-badge">
+            {{ type.user_id ? 'De mi organización' : 'Compartido' }}
+          </span>
+        </div>
+        <div class="type-details">
+          <span class="risk-badge">{{ classificationLabel(type.clasificacion_riesgo) }}</span>
+          <span>
+            {{
+              type.frecuencia_mantenimiento_meses
+                ? `Mantenimiento cada ${type.frecuencia_mantenimiento_meses} meses`
+                : 'Frecuencia sin definir'
+            }}
+          </span>
+        </div>
+        <a
+          *ngIf="type.user_id"
+          class="edit-link"
+          [routerLink]="['/tipos-equipo/editar', type.id]"
+          [attr.aria-label]="'Editar tipo de equipo ' + type.nombre"
+          >Editar</a
+        >
+      </div>
+    </article>
+  </section>
+</main>

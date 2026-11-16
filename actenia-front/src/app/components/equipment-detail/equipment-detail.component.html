@@ -1,0 +1,489 @@
+<main class="detail-page">
+  <header class="page-header">
+    <a class="back-link" routerLink="/equipment-list">
+      <mat-icon fontSet="material-symbols-outlined">arrow_back</mat-icon>
+      Volver a activos
+    </a>
+    <div *ngIf="equipment() as asset" class="header-content">
+      <div>
+        <p class="eyebrow">HOJA DE VIDA DEL ACTIVO</p>
+        <h1>{{ asset.nombre }}</h1>
+        <p class="subtitle">
+          ID Inventario: <strong>#{{ asset.numero_inventario }}</strong>
+          <span *ngIf="asset.tipo_equipo?.nombre">· {{ asset.tipo_equipo?.nombre }}</span>
+        </p>
+      </div>
+      <a mat-stroked-button [routerLink]="['/equipment-form', asset.id]">
+        <mat-icon fontSet="material-symbols-outlined">edit_note</mat-icon>
+        Formulario completo
+      </a>
+    </div>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message message-error" role="alert">{{ errorMessage() }}</p>
+  <p *ngIf="successMessage()" class="message message-success" role="status">
+    {{ successMessage() }}
+  </p>
+  <div *ngIf="loading()" class="loading-state" aria-live="polite">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Cargando hoja de vida...</span>
+  </div>
+
+  <ng-container *ngIf="!loading() && equipment() as asset">
+    <section class="detail-grid" aria-label="Hoja de vida del activo">
+      <mat-card appearance="outlined" class="asset-card general-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-avatar">
+            <mat-icon fontSet="material-symbols-outlined">inventory_2</mat-icon>
+          </div>
+          <mat-card-title>Información general</mat-card-title>
+          <mat-card-subtitle>Identificación del activo</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-button"
+            aria-label="Editar información general"
+            (click)="openSection('general')"
+          >
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="asset-image">
+            <img
+              *ngIf="asset.imagen_url || asset.tipo_equipo?.imagen_url; else noAssetImage"
+              [src]="asset.imagen_url || asset.tipo_equipo?.imagen_url"
+              [alt]="'Imagen de ' + asset.nombre"
+            />
+            <ng-template #noAssetImage>
+              <mat-icon fontSet="material-symbols-outlined">image</mat-icon>
+            </ng-template>
+          </div>
+          <dl class="detail-list">
+            <div>
+              <dt>Inventario</dt>
+              <dd>#{{ asset.numero_inventario }}</dd>
+            </div>
+            <div>
+              <dt>Activo</dt>
+              <dd>{{ asset.nombre }}</dd>
+            </div>
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ specification(asset.tipo_equipo?.nombre) }}</dd>
+            </div>
+            <div>
+              <dt>Marca</dt>
+              <dd>{{ specification(asset.marca) }}</dd>
+            </div>
+            <div>
+              <dt>Modelo</dt>
+              <dd>{{ specification(asset.modelo) }}</dd>
+            </div>
+            <div>
+              <dt>Serie</dt>
+              <dd>{{ specification(asset.serial) }}</dd>
+            </div>
+            <div>
+              <dt>Fabricante</dt>
+              <dd>{{ specification(asset.fabricante) }}</dd>
+            </div>
+            <div>
+              <dt>Adquisición</dt>
+              <dd>
+                {{
+                  asset.fecha_adquisicion
+                    ? (asset.fecha_adquisicion | date: 'dd/MM/yyyy' : 'UTC')
+                    : 'No registrada'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Garantía</dt>
+              <dd>{{ specification(asset.garantia_periodo) }}</dd>
+            </div>
+            <div>
+              <dt>Vida útil</dt>
+              <dd>
+                {{ asset.vida_util_anios ? asset.vida_util_anios + ' años' : 'No registrada' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Riesgo INVIMA</dt>
+              <dd>
+                {{
+                  asset.clasificacion_riesgo_invima
+                    ? 'Clase ' + asset.clasificacion_riesgo_invima
+                    : 'No aplica / no registrado'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Registro sanitario</dt>
+              <dd>{{ specification(asset.registro_sanitario_invima) }}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>
+                <span
+                  class="status-chip"
+                  [ngClass]="{
+                    'status-active': asset.estado === 'EN USO',
+                    'status-maintenance': asset.estado === 'EN MANTENIMIENTO',
+                    'status-retired': asset.estado === 'DE BAJA',
+                  }"
+                  >{{ asset.estado }}</span
+                >
+              </dd>
+            </div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="asset-card technical-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-avatar">
+            <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+          </div>
+          <mat-card-title>Datos técnicos y eléctricos</mat-card-title>
+          <mat-card-subtitle>Especificaciones del equipo</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-button"
+            aria-label="Editar datos técnicos"
+            (click)="openSection('technical')"
+          >
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Especificaciones eléctricas</h3>
+          <dl class="detail-list">
+            <div>
+              <dt>Voltaje</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.voltaje) }}</dd>
+            </div>
+            <div>
+              <dt>Frecuencia</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.frecuencia) }}</dd>
+            </div>
+            <div>
+              <dt>Potencia</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.potencia) }}</dd>
+            </div>
+            <div>
+              <dt>Amperaje</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.amperaje) }}</dd>
+            </div>
+            <div>
+              <dt>Corriente</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.corriente) }}</dd>
+            </div>
+            <div>
+              <dt>Usa batería</dt>
+              <dd>{{ asset.especificaciones_electricas?.usa_bateria ? 'Sí' : 'No' }}</dd>
+            </div>
+            <div *ngIf="asset.especificaciones_electricas?.usa_bateria">
+              <dt>Tipo de batería</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.tipo_bateria) }}</dd>
+            </div>
+            <div>
+              <dt>Usa adaptador</dt>
+              <dd>{{ asset.especificaciones_electricas?.usa_adaptador ? 'Sí' : 'No' }}</dd>
+            </div>
+            <div *ngIf="asset.especificaciones_electricas?.usa_adaptador">
+              <dt>Voltaje adaptador</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.voltaje_adaptador) }}</dd>
+            </div>
+            <div *ngIf="asset.especificaciones_electricas?.usa_adaptador">
+              <dt>Amperaje adaptador</dt>
+              <dd>{{ specification(asset.especificaciones_electricas?.amperaje_adaptador) }}</dd>
+            </div>
+          </dl>
+          <h3>Dimensiones</h3>
+          <dl class="detail-list">
+            <div>
+              <dt>Peso</dt>
+              <dd>
+                {{ asset.dimensiones?.peso_kg ?? 'No registrado' }}
+                {{
+                  asset.dimensiones?.peso_kg !== null && asset.dimensiones?.peso_kg !== undefined
+                    ? 'kg'
+                    : ''
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Largo</dt>
+              <dd>
+                {{ asset.dimensiones?.largo_mm ?? 'No registrado' }}
+                {{
+                  asset.dimensiones?.largo_mm !== null && asset.dimensiones?.largo_mm !== undefined
+                    ? 'mm'
+                    : ''
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Ancho</dt>
+              <dd>
+                {{ asset.dimensiones?.ancho_mm ?? 'No registrado' }}
+                {{
+                  asset.dimensiones?.ancho_mm !== null && asset.dimensiones?.ancho_mm !== undefined
+                    ? 'mm'
+                    : ''
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Alto</dt>
+              <dd>
+                {{ asset.dimensiones?.alto_mm ?? 'No registrado' }}
+                {{
+                  asset.dimensiones?.alto_mm !== null && asset.dimensiones?.alto_mm !== undefined
+                    ? 'mm'
+                    : ''
+                }}
+              </dd>
+            </div>
+          </dl>
+          <a
+            *ngIf="asset.manual_usuario_url"
+            class="external-link"
+            [href]="asset.manual_usuario_url"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+            Abrir manual de usuario
+          </a>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="asset-card location-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-avatar">
+            <mat-icon fontSet="material-symbols-outlined">location_on</mat-icon>
+          </div>
+          <mat-card-title>Ubicación</mat-card-title>
+          <mat-card-subtitle>Sede y área asignada</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-button"
+            aria-label="Editar ubicación"
+            (click)="openSection('location')"
+          >
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <dl class="detail-list">
+            <div>
+              <dt>Empresa</dt>
+              <dd>{{ specification(asset.sede?.empresa) }}</dd>
+            </div>
+            <div>
+              <dt>Sede</dt>
+              <dd>{{ specification(asset.sede?.nombre) }}</dd>
+            </div>
+            <div>
+              <dt>Dirección</dt>
+              <dd>{{ specification(asset.sede?.direccion) }}</dd>
+            </div>
+            <div>
+              <dt>Ciudad</dt>
+              <dd>{{ specification(asset.sede?.ciudad) }}</dd>
+            </div>
+            <div>
+              <dt>Área / consultorio</dt>
+              <dd>{{ specification(asset.ubicacion?.nombre) }}</dd>
+            </div>
+            <div>
+              <dt>Piso</dt>
+              <dd>{{ specification(asset.ubicacion?.piso) }}</dd>
+            </div>
+            <div>
+              <dt>Código de servicio</dt>
+              <dd>{{ specification(asset.ubicacion?.codigo_servicio) }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="asset-card maintenance-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-avatar">
+            <mat-icon fontSet="material-symbols-outlined">build</mat-icon>
+          </div>
+          <mat-card-title>Mantenimiento y calibración</mat-card-title>
+          <mat-card-subtitle>Planificación y alertas</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-button"
+            aria-label="Editar mantenimiento y calibración"
+            (click)="openSection('maintenance')"
+          >
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <dl class="detail-list">
+            <div>
+              <dt>Requiere calibración</dt>
+              <dd>{{ asset.requiere_calibracion ? 'Sí' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Frecuencia calibración</dt>
+              <dd>{{ specification(asset.frecuencia_calibracion) }}</dd>
+            </div>
+            <div>
+              <dt>Próxima calibración</dt>
+              <dd>
+                <ng-container *ngIf="asset.fecha_proxima_calibracion; else noCalibrationDate">
+                  {{ asset.fecha_proxima_calibracion | date: 'dd/MM/yyyy' : 'UTC' }}
+                  <span
+                    class="alert-chip"
+                    [ngClass]="maintenanceAlertClass(asset.fecha_proxima_calibracion)"
+                  >
+                    {{ maintenanceAlertLabel(asset.fecha_proxima_calibracion) }}
+                  </span>
+                </ng-container>
+                <ng-template #noCalibrationDate>No programada</ng-template>
+              </dd>
+            </div>
+            <div>
+              <dt>Frecuencia mantenimiento</dt>
+              <dd>{{ specification(asset.frecuencia_mantenimiento) }}</dd>
+            </div>
+            <div>
+              <dt>Próximo mantenimiento</dt>
+              <dd>
+                <ng-container *ngIf="asset.fecha_proximo_mantenimiento; else noMaintenanceDate">
+                  {{ asset.fecha_proximo_mantenimiento | date: 'dd/MM/yyyy' : 'UTC' }}
+                  <span
+                    class="alert-chip"
+                    [ngClass]="maintenanceAlertClass(asset.fecha_proximo_mantenimiento)"
+                  >
+                    {{ maintenanceAlertLabel(asset.fecha_proximo_mantenimiento) }}
+                  </span>
+                </ng-container>
+                <ng-template #noMaintenanceDate>No programado</ng-template>
+              </dd>
+            </div>
+            <div class="stacked-row">
+              <dt>Observaciones</dt>
+              <dd>{{ specification(asset.observaciones) }}</dd>
+            </div>
+          </dl>
+          <button
+            mat-button
+            color="primary"
+            type="button"
+            class="intervention-button"
+            (click)="openMaintenanceForm()"
+          >
+            <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+            Registrar intervención
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="asset-card provider-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-avatar">
+            <mat-icon fontSet="material-symbols-outlined">business</mat-icon>
+          </div>
+          <mat-card-title>Datos del proveedor</mat-card-title>
+          <mat-card-subtitle>Información de contacto</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-button"
+            aria-label="Editar datos del proveedor"
+            (click)="openSection('provider')"
+          >
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <ng-container *ngIf="asset.proveedor; else noSupplier">
+            <dl class="detail-list">
+              <div>
+                <dt>Nombre</dt>
+                <dd>{{ asset.proveedor.nombre }}</dd>
+              </div>
+              <div>
+                <dt>Dirección</dt>
+                <dd>{{ specification(asset.proveedor.direccion) }}</dd>
+              </div>
+              <div>
+                <dt>Teléfono fijo</dt>
+                <dd>{{ specification(asset.proveedor.telefono_fijo) }}</dd>
+              </div>
+              <div>
+                <dt>Celular</dt>
+                <dd>{{ specification(asset.proveedor.telefono_celular) }}</dd>
+              </div>
+              <div>
+                <dt>Correo</dt>
+                <dd>{{ specification(asset.proveedor.email) }}</dd>
+              </div>
+              <div>
+                <dt>Sitio web</dt>
+                <dd>
+                  <a
+                    *ngIf="asset.proveedor.sitio_web"
+                    [href]="asset.proveedor.sitio_web"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >{{ asset.proveedor.sitio_web }}</a
+                  >
+                  <span *ngIf="!asset.proveedor.sitio_web">No registrado</span>
+                </dd>
+              </div>
+            </dl>
+          </ng-container>
+          <ng-template #noSupplier><p class="muted">No hay un proveedor asociado.</p></ng-template>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <mat-card appearance="outlined" class="history-card">
+      <mat-card-header>
+        <div mat-card-avatar class="card-avatar">
+          <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+        </div>
+        <mat-card-title>Historial de mantenimiento</mat-card-title>
+        <mat-card-subtitle
+          >{{ maintenanceHistory().length }} intervenciones registradas</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="maintenanceHistory().length === 0" class="empty-state">
+          Aún no hay intervenciones registradas para este activo.
+        </div>
+        <div *ngIf="maintenanceHistory().length > 0" class="history-list">
+          <article *ngFor="let event of maintenanceHistory()" class="history-entry">
+            <time class="history-date" [attr.datetime]="event.fecha">
+              {{ event.fecha | date: 'dd/MM/yyyy' : 'UTC' }}
+            </time>
+            <div class="history-content">
+              <h3>{{ maintenanceTypeLabel(event.tipo) }}</h3>
+              <p>{{ event.descripcion }}</p>
+              <span class="muted">
+                {{ event.proveedor?.nombre || 'Sin proveedor' }}
+                <span *ngIf="event.costo !== null"> · {{ event.costo | number: '1.2-2' }}</span>
+                <span *ngIf="event.proxima_fecha">
+                  · Próxima: {{ event.proxima_fecha | date: 'dd/MM/yyyy' : 'UTC' }}</span
+                >
+              </span>
+            </div>
+          </article>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</main>

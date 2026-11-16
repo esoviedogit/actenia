@@ -1,0 +1,121 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">GESTIÓN DE ACTIVOS</p>
+      <h1>Activos</h1>
+      <p class="subtitle">Consulta la ubicación, el estado y el mantenimiento de tus activos.</p>
+    </div>
+    <a class="button button-primary" routerLink="/equipment-form">+ Registrar activo</a>
+  </header>
+
+  <section class="panel">
+    <div class="toolbar">
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          placeholder="Buscar por inventario, marca, modelo o serial"
+          aria-label="Buscar equipos"
+        />
+      </label>
+      <span class="count">{{ filteredEquipment().length }} activos</span>
+    </div>
+
+    <p *ngIf="errorMessage()" class="message message-error" role="alert">{{ errorMessage() }}</p>
+    <div *ngIf="loading()" class="empty-state">Cargando inventario...</div>
+    <div
+      *ngIf="!loading() && !errorMessage() && filteredEquipment().length === 0"
+      class="empty-state"
+    >
+      {{
+        searchTerm()
+          ? 'No hay equipos que coincidan con la búsqueda.'
+          : 'Aún no hay activos registrados.'
+      }}
+    </div>
+
+    <div *ngIf="!loading() && filteredEquipment().length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Inventario</th>
+            <th>Activo</th>
+            <th>Ubicación</th>
+            <th>Estado</th>
+            <th>Mantenimiento / calibración</th>
+            <th><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let equipment of filteredEquipment()">
+            <td>
+              <strong>{{ equipment.numero_inventario }}</strong>
+              <span class="secondary">{{ equipment.serial || 'Sin serial' }}</span>
+            </td>
+            <td>
+              <img
+                *ngIf="equipment.imagen_url || equipment.tipo_equipo?.imagen_url"
+                class="asset-thumbnail"
+                [src]="equipment.imagen_url || equipment.tipo_equipo?.imagen_url"
+                [alt]="'Foto de ' + equipment.nombre"
+                loading="lazy"
+              />
+              <strong>{{
+                equipment.nombre || equipment.tipo_equipo?.nombre || equipment.marca || 'Activo'
+              }}</strong>
+              <span class="secondary">
+                {{ equipment.tipo_equipo?.nombre }} · {{ equipment.marca }} {{ equipment.modelo }}
+              </span>
+            </td>
+            <td>
+              <span>{{ equipment.sede?.nombre || 'Sin sede' }}</span>
+              <span class="secondary">{{
+                equipment.ubicacion?.nombre || 'Sin ubicación o área'
+              }}</span>
+              <span *ngIf="equipment.ubicacion?.piso" class="secondary">{{
+                equipment.ubicacion?.piso
+              }}</span>
+            </td>
+            <td>
+              <span
+                class="status-chip"
+                [ngClass]="{
+                  'status-active': equipment.estado === 'EN USO',
+                  'status-maintenance': equipment.estado === 'EN MANTENIMIENTO',
+                  'status-retired': equipment.estado === 'DE BAJA',
+                }"
+                >{{ equipment.estado }}</span
+              >
+            </td>
+            <td>
+              <span class="alert-chip" [ngClass]="'alert-' + alertFor(equipment).level">
+                {{ alertFor(equipment).label }}
+              </span>
+              <span class="secondary">{{
+                alertFor(equipment).date
+                  ? (alertFor(equipment).date | date: 'dd/MM/yyyy' : 'UTC')
+                  : 'Sin fecha programada'
+              }}</span>
+            </td>
+            <td class="actions">
+              <a class="text-button" [routerLink]="['/equipment-detail', equipment.id]"
+                >Ver ficha</a
+              >
+              <a class="text-button" [routerLink]="['/equipment-form', equipment.id]">Editar</a>
+              <button
+                class="text-button danger"
+                type="button"
+                (click)="deleteEquipment(equipment)"
+                [disabled]="deletingId() === equipment.id"
+              >
+                {{ deletingId() === equipment.id ? 'Eliminando…' : 'Eliminar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>

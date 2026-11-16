@@ -1,0 +1,55 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">ÁREAS Y ESPACIOS DE TRABAJO</p>
+      <h1>Ubicaciones</h1>
+      <p class="subtitle">Organiza las áreas de cada sede y asigna activos a su ubicación.</p>
+    </div>
+    <a class="button button-primary" routerLink="/ubicaciones/nueva">+ Nueva ubicación</a>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loading()" class="empty-state">Cargando ubicaciones...</div>
+  <div *ngIf="!loading() && !errorMessage() && ubicaciones().length === 0" class="empty-state">
+    <span class="empty-icon" aria-hidden="true">⌖</span>
+    <strong>Aún no hay ubicaciones registradas</strong>
+    <span>Crea áreas como quirófanos, laboratorios, salas de terapia o consultorios.</span>
+    <a class="button button-primary" routerLink="/ubicaciones/nueva">Registrar primera ubicación</a>
+  </div>
+
+  <section
+    *ngIf="!loading() && ubicaciones().length > 0"
+    class="location-grid"
+    aria-label="Ubicaciones registradas"
+  >
+    <article class="location-card" *ngFor="let ubicacion of ubicaciones()">
+      <div class="location-icon" aria-hidden="true">⌖</div>
+      <div class="location-content">
+        <div class="card-heading">
+          <div>
+            <h2>{{ ubicacion.nombre }}</h2>
+            <p class="sede-name">{{ ubicacion.sede?.nombre || 'Sede no disponible' }}</p>
+          </div>
+          <a
+            class="text-button"
+            [routerLink]="['/ubicaciones/editar', ubicacion.id]"
+            [attr.aria-label]="'Editar ubicación ' + ubicacion.nombre"
+            >Editar</a
+          >
+        </div>
+        <p *ngIf="ubicacion.piso" class="detail">{{ ubicacion.piso }}</p>
+        <p *ngIf="ubicacion.codigo_servicio" class="service-code">
+          <span>CÓDIGO DE SERVICIO</span>{{ ubicacion.codigo_servicio }}
+        </p>
+        <button
+          class="text-button danger"
+          type="button"
+          [disabled]="deletingId() === ubicacion.id"
+          (click)="deleteUbicacion(ubicacion)"
+        >
+          {{ deletingId() === ubicacion.id ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </article>
+  </section>
+</main>

@@ -1,2 +1,2 @@
 # actenia
-Tu habilitación al día, tus equipos bajo control
+Todos los activos de tu organización de salud, bajo control.

@@ -1,0 +1,126 @@
+<main class="form-page">
+  <header class="form-header">
+    <a class="back-link" routerLink="/tipos-equipo">← Volver a tipos de equipo</a>
+    <p class="eyebrow">CATÁLOGO DE ACTIVOS</p>
+    <h1>{{ equipmentTypeId ? 'Editar tipo de equipo' : 'Registrar tipo de equipo' }}</h1>
+    <p>
+      {{
+        equipmentTypeId
+          ? 'Actualiza la categoría del activo.'
+          : 'Crea una categoría para organizar los activos de tu institución.'
+      }}
+    </p>
+  </header>
+
+  <p *ngIf="errorMessage()" class="message-error" role="alert">{{ errorMessage() }}</p>
+  <p *ngIf="successMessage()" class="message-success" role="status">{{ successMessage() }}</p>
+  <div *ngIf="loadingType()" class="loading-state" aria-live="polite">
+    Cargando tipo de equipo...
+  </div>
+
+  <form *ngIf="!loadingType()" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <section class="form-section" aria-labelledby="type-details-title">
+      <h2 id="type-details-title">Datos del tipo de equipo</h2>
+      <div class="field-grid">
+        <label>
+          Nombre <b>*</b>
+          <input
+            type="text"
+            formControlName="nombre"
+            maxlength="100"
+            placeholder="Ej. Bomba de infusión"
+            autocomplete="off"
+          />
+          <small
+            *ngIf="form.get('nombre')?.touched && form.get('nombre')?.hasError('required')"
+            class="field-error"
+            >El nombre es obligatorio.</small
+          >
+          <small
+            *ngIf="form.get('nombre')?.touched && form.get('nombre')?.hasError('maxlength')"
+            class="field-error"
+            >El nombre no puede superar 100 caracteres.</small
+          >
+        </label>
+
+        <label>
+          Clasificación de riesgo INVIMA <b>*</b>
+          <select formControlName="clasificacion_riesgo">
+            <option value="">Selecciona una clasificación</option>
+            <option value="I">Clase I</option>
+            <option value="IIa">Clase IIa</option>
+            <option value="IIb">Clase IIb</option>
+            <option value="III">Clase III</option>
+          </select>
+          <small
+            *ngIf="
+              form.get('clasificacion_riesgo')?.touched &&
+              form.get('clasificacion_riesgo')?.hasError('required')
+            "
+            class="field-error"
+            >Selecciona la clasificación de riesgo.</small
+          >
+        </label>
+
+        <label>
+          Frecuencia de mantenimiento (meses) <b>*</b>
+          <input
+            type="number"
+            formControlName="frecuencia_mantenimiento_meses"
+            min="1"
+            step="1"
+            placeholder="Ej. 6"
+          />
+          <small
+            *ngIf="
+              form.get('frecuencia_mantenimiento_meses')?.touched &&
+              form.get('frecuencia_mantenimiento_meses')?.hasError('required')
+            "
+            class="field-error"
+            >La frecuencia de mantenimiento es obligatoria.</small
+          >
+          <small
+            *ngIf="
+              form.get('frecuencia_mantenimiento_meses')?.touched &&
+              (form.get('frecuencia_mantenimiento_meses')?.hasError('min') ||
+                form.get('frecuencia_mantenimiento_meses')?.hasError('pattern'))
+            "
+            class="field-error"
+            >Ingresa un número entero de meses mayor que cero.</small
+          >
+        </label>
+
+        <label class="image-field">
+          Imagen de referencia
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            (change)="onImageSelected($event)"
+          />
+          <span class="field-hint"
+            >Imagen JPG, PNG, WebP u otro formato compatible (máximo 5 MB).</span
+          >
+          <span *ngIf="selectedImage()" class="field-hint">{{ selectedImage()?.name }}</span>
+        </label>
+        <div *ngIf="imagePreviewUrl()" class="image-preview">
+          <img [src]="imagePreviewUrl()" alt="Vista previa del tipo de equipo" />
+          <span>Vista previa</span>
+        </div>
+      </div>
+      <p class="required-note"><b>*</b> Campos obligatorios</p>
+    </section>
+
+    <footer class="form-actions">
+      <a class="button button-secondary" routerLink="/tipos-equipo">Cancelar</a>
+      <button class="button button-primary" type="submit" [disabled]="loading()">
+        {{
+          loading()
+            ? 'Guardando…'
+            : equipmentTypeId
+              ? 'Guardar cambios'
+              : 'Registrar tipo de equipo'
+        }}
+      </button>
+    </footer>
+  </form>
+</main>

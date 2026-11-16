@@ -1,0 +1,19 @@
+<div class="app-shell">
+  <header class="topbar" *ngIf="auth.session()">
+    <a class="brand" routerLink="/equipment-list" aria-label="Actenia, ir al inventario">
+      <span class="brand-mark">A</span>
+      <span>{{ title() }}<small>GESTIÓN DE ACTIVOS</small></span>
+    </a>
+    <nav aria-label="Navegación principal">
+      <a routerLink="/equipment-list" routerLinkActive="active">Activos</a>
+      <a routerLink="/equipment-form" routerLinkActive="active">Registrar activo</a>
+      <a routerLink="/sedes" routerLinkActive="active">Sedes</a>
+      <a routerLink="/ubicaciones" routerLinkActive="active">Áreas</a>
+      <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
+      <a routerLink="/tipos-equipo" routerLinkActive="active">Tipos de equipo</a>
+      <button class="logout-button" type="button" (click)="logout()">Cerrar sesión</button>
+    </nav>
+  </header>
+  <p *ngIf="logoutError" class="logout-error" role="alert">{{ logoutError }}</p>
+  <router-outlet />
+</div>
