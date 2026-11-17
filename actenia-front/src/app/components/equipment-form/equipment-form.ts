@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import {
   Equipment,
   EquipmentCatalogs,
@@ -17,11 +20,20 @@ import { SedeService } from '../../services/sede.service';
 import { Ubicacion } from '../../models/ubicacion.model';
 import { UbicacionService } from '../../services/ubicacion.service';
 import { EquipmentTypeService } from '../../services/equipment-type.service';
+import { MAINTENANCE_FREQUENCIES } from '../../models/maintenance-frequency.model';
+import { MAINTENANCE_MONTHS } from '../../models/maintenance-month.model';
 
 @Component({
   selector: 'app-equipment-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatSelectModule,
+  ],
   templateUrl: './equipment-form.html',
   styleUrl: './equipment-form.css',
 })
@@ -34,6 +46,8 @@ export class EquipmentFormComponent implements OnInit, OnDestroy {
   readonly sedes = signal<Sede[]>([]);
   readonly ubicaciones = signal<Ubicacion[]>([]);
   readonly tiposEquipo = signal<EquipmentType[]>([]);
+  readonly maintenanceFrequencies = MAINTENANCE_FREQUENCIES;
+  readonly maintenanceMonths = MAINTENANCE_MONTHS;
   readonly selectedEquipmentType = signal<EquipmentType | null>(null);
   readonly selectedImage = signal<File | null>(null);
   readonly imagePreviewUrl = signal<string | null>(null);
@@ -97,7 +111,8 @@ export class EquipmentFormComponent implements OnInit, OnDestroy {
       }),
       requiere_calibracion: [false],
       frecuencia_calibracion: [''],
-      frecuencia_mantenimiento: [''],
+      frecuencia_mantenimiento_meses: [null as number | null],
+      meses_programados: this.fb.nonNullable.control<string[]>([]),
       fecha_proximo_mantenimiento: [''],
       fecha_proxima_calibracion: [''],
       observaciones: [''],
@@ -286,7 +301,11 @@ export class EquipmentFormComponent implements OnInit, OnDestroy {
       dimensiones: value.dimensiones,
       requiere_calibracion: value.requiere_calibracion ?? false,
       frecuencia_calibracion: this.nullIfEmpty(value.frecuencia_calibracion),
-      frecuencia_mantenimiento: this.nullIfEmpty(value.frecuencia_mantenimiento),
+      frecuencia_mantenimiento_meses:
+        value.frecuencia_mantenimiento_meses === '' || value.frecuencia_mantenimiento_meses === null
+          ? null
+          : Number(value.frecuencia_mantenimiento_meses),
+      meses_programados: value.meses_programados ?? [],
       fecha_proximo_mantenimiento: this.nullIfEmpty(value.fecha_proximo_mantenimiento),
       fecha_proxima_calibracion: this.nullIfEmpty(value.fecha_proxima_calibracion),
       observaciones: this.nullIfEmpty(value.observaciones),
@@ -325,7 +344,8 @@ export class EquipmentFormComponent implements OnInit, OnDestroy {
       dimensiones: payload.dimensiones,
       requiere_calibracion: payload.requiere_calibracion,
       frecuencia_calibracion: payload.frecuencia_calibracion,
-      frecuencia_mantenimiento: payload.frecuencia_mantenimiento,
+      frecuencia_mantenimiento_meses: payload.frecuencia_mantenimiento_meses,
+      meses_programados: payload.meses_programados,
       fecha_mantenimiento: payload.fecha_proximo_mantenimiento,
       fecha_calibracion: payload.fecha_proxima_calibracion,
       observaciones: payload.observaciones,

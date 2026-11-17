@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+<mat-dialog-content>
+  <p *ngIf="errorMessage()" class="dialog-error" role="alert">{{ errorMessage() }}</p>
+  <form [formGroup]="form" class="history-form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline">
+      <mat-label>Equipo</mat-label>
+      <mat-select formControlName="equipo_id" required>
+        <mat-option *ngFor="let equipment of data.equipments" [value]="equipment.id">
+          {{ equipment.numero_inventario }} · {{ equipment.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.controls.equipo_id.hasError('required')">
+        Selecciona un equipo.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de mantenimiento</mat-label>
+      <mat-select formControlName="tipo_mantenimiento_id" required>
+        <mat-option *ngFor="let type of data.types" [value]="type.id">
+          {{ type.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.controls.tipo_mantenimiento_id.hasError('required')">
+        Selecciona un tipo de mantenimiento.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de mantenimiento</mat-label>
+      <input matInput type="date" formControlName="fecha" required />
+      <mat-error *ngIf="form.controls.fecha.hasError('required')">
+        La fecha es obligatoria.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Actividades realizadas</mat-label>
+      <textarea
+        matInput
+        rows="4"
+        maxlength="4000"
+        formControlName="observaciones"
+        required
+      ></textarea>
+      <mat-error *ngIf="form.controls.observaciones.hasError('required')">
+        Ingresa las observaciones de la intervención.
+      </mat-error>
+      <mat-error *ngIf="form.controls.observaciones.hasError('maxlength')">
+        Las observaciones no pueden superar 4000 caracteres.
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()" [disabled]="saving()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'Guardando…' : 'Guardar intervención' }}
+  </button>
+</mat-dialog-actions>

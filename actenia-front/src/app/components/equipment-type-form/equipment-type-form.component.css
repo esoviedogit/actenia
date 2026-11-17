@@ -59,6 +59,10 @@ h2 {
   gap: 18px 16px;
 }
 
+.frequency-field {
+  width: 100%;
+}
+
 label {
   display: grid;
   align-content: start;

@@ -2,17 +2,28 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import {
   EquipmentRiskClassification,
   EquipmentTypeService,
 } from '../../services/equipment-type.service';
+import { MAINTENANCE_FREQUENCIES } from '../../models/maintenance-frequency.model';
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-equipment-type-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatSelectModule,
+  ],
   templateUrl: './equipment-type-form.component.html',
   styleUrl: './equipment-type-form.component.css',
 })
@@ -25,6 +36,7 @@ export class EquipmentTypeFormComponent implements OnDestroy {
   readonly imagePreviewUrl = signal<string | null>(null);
   readonly existingImageUrl = signal<string | null>(null);
   readonly equipmentTypeId: string | null;
+  readonly maintenanceFrequencies = MAINTENANCE_FREQUENCIES;
   readonly form: FormGroup;
 
   constructor(
@@ -37,10 +49,7 @@ export class EquipmentTypeFormComponent implements OnDestroy {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       clasificacion_riesgo: ['', Validators.required],
-      frecuencia_mantenimiento_meses: [
-        null as number | null,
-        [Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)],
-      ],
+      frecuencia_mantenimiento_meses: [null as number | null, Validators.required],
     });
     if (this.equipmentTypeId) void this.loadEquipmentType(this.equipmentTypeId);
   }

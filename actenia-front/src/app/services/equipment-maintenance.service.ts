@@ -5,7 +5,8 @@ import {
 } from '../models/equipment-maintenance.model';
 import { SupabaseService } from './supabase-services/supabase/supabase';
 
-const MAINTENANCE_SELECT = '*, proveedor:proveedores(id,nombre)';
+const MAINTENANCE_SELECT =
+  'id,equipo_id,user_id,tipo,fecha,descripcion,costo,proxima_fecha,created_at';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentMaintenanceService {
@@ -36,9 +37,10 @@ export class EquipmentMaintenanceService {
     const { data, error } = await this.supabase.client
       .from('mantenimientos_equipos')
       .insert({
-        ...payload,
+        equipo_id: payload.equipo_id,
+        tipo: payload.tipo,
+        fecha: payload.fecha,
         descripcion,
-        proveedor_id: payload.proveedor_id || null,
         costo: payload.costo ?? null,
         proxima_fecha: payload.proxima_fecha || null,
         user_id: userId,

@@ -198,9 +198,22 @@
       </div>
 
       <div *ngSwitchCase="'maintenance'" class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Meses programados para mantenimiento preventivo</mat-label>
+          <mat-select formControlName="meses_programados" multiple>
+            <mat-option *ngFor="let month of maintenanceMonths" [value]="month.value">
+              {{ month.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Frecuencia de mantenimiento</mat-label>
-          <input matInput formControlName="frecuencia_mantenimiento" />
+          <mat-select formControlName="frecuencia_mantenimiento_meses">
+            <mat-option [value]="null">Sin frecuencia definida</mat-option>
+            <mat-option *ngFor="let frequency of maintenanceFrequencies" [value]="frequency.months">
+              {{ frequency.label }}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Próximo mantenimiento</mat-label>
@@ -264,6 +277,12 @@
       </div>
 
       <div *ngSwitchCase="'maintenance-entry'" class="form-grid">
+        <p class="full-width audit-note" role="note">
+          <mat-icon fontSet="material-symbols-outlined">account_circle</mat-icon>
+          <span
+            >Registrado por: <strong>{{ data.recordedBy }}</strong></span
+          >
+        </p>
         <mat-form-field appearance="outline">
           <mat-label>Tipo de intervención</mat-label>
           <mat-select formControlName="tipo">
@@ -279,15 +298,6 @@
         <mat-form-field appearance="outline">
           <mat-label>Próxima fecha</mat-label>
           <input matInput type="date" formControlName="proxima_fecha" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Proveedor</mat-label>
-          <mat-select formControlName="proveedor_id">
-            <mat-option value="">Sin proveedor</mat-option>
-            <mat-option *ngFor="let provider of data.providers" [value]="provider.id">
-              {{ provider.nombre }}
-            </mat-option>
-          </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Costo</mat-label>

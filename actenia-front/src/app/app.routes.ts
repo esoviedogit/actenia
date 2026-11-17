@@ -16,6 +16,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'equipment-schedule',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/equipment-schedule/equipment-schedule.component').then(
+        (module) => module.EquipmentScheduleComponent,
+      ),
+  },
+  {
+    path: 'maintenance-history',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/maintenance-history/maintenance-history.component').then(
+        (module) => module.MaintenanceHistoryComponent,
+      ),
+  },
+  {
     path: 'equipment-detail/:id',
     canActivate: [authGuard],
     loadComponent: () =>

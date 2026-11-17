@@ -4,6 +4,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +13,8 @@ import { EquipmentType } from '../../models/equipment-type.model';
 import { Proveedor } from '../../models/proveedor.model';
 import { Sede } from '../../models/sede.model';
 import { Ubicacion } from '../../models/ubicacion.model';
+import { MAINTENANCE_FREQUENCIES } from '../../models/maintenance-frequency.model';
+import { MAINTENANCE_MONTHS } from '../../models/maintenance-month.model';
 
 export type EquipmentEditSection =
   'general' | 'technical' | 'location' | 'maintenance' | 'provider';
@@ -27,6 +30,7 @@ export interface EquipmentSectionDialogData {
   loadingLocations: Signal<boolean>;
   locationError: Signal<string>;
   imageUrl: string | null;
+  recordedBy: string;
   onSedeChange: () => void;
   onProviderChange: () => void;
   save: (image: File | null) => Promise<void>;
@@ -45,6 +49,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
     MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatOptionModule,
     MatIconModule,
     MatInputModule,
     MatSelectModule,
@@ -53,6 +58,8 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
   styleUrl: './equipment-section-dialog.component.css',
 })
 export class EquipmentSectionDialogComponent implements OnDestroy {
+  readonly maintenanceFrequencies = MAINTENANCE_FREQUENCIES;
+  readonly maintenanceMonths = MAINTENANCE_MONTHS;
   readonly saving = signal(false);
   readonly errorMessage = signal('');
   readonly imageUrl = signal<string | null>(null);

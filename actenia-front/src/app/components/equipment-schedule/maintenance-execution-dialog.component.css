@@ -1,0 +1,38 @@
+:host {
+  display: block;
+}
+
+mat-dialog-content {
+  min-width: min(420px, calc(100vw - 64px));
+}
+
+.execution-summary {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 18px;
+  color: #50636b;
+  font-size: 13px;
+}
+
+.execution-summary strong {
+  color: #203b46;
+  font-size: 15px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.dialog-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff0ef;
+  color: #a63d38;
+  font-size: 13px;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 12px 24px 20px;
+}

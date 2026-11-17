@@ -30,7 +30,38 @@
   </div>
 
   <ng-container *ngIf="!loading() && equipment() as asset">
-    <section class="detail-grid" aria-label="Hoja de vida del activo">
+    <section class="summary-grid" aria-label="Resumen ejecutivo del activo">
+      <article class="summary-tile">
+        <span class="summary-label">Estado operativo</span>
+        <strong class="summary-value">{{ asset.estado }}</strong>
+      </article>
+      <article class="summary-tile">
+        <span class="summary-label">Número de inventario</span>
+        <strong class="summary-value">#{{ asset.numero_inventario }}</strong>
+      </article>
+      <article class="summary-tile">
+        <span class="summary-label">Riesgo INVIMA</span>
+        <strong class="summary-value">
+          {{
+            asset.clasificacion_riesgo_invima
+              ? 'Clase ' + asset.clasificacion_riesgo_invima
+              : 'No aplica / no registrado'
+          }}
+        </strong>
+      </article>
+      <article class="summary-tile">
+        <span class="summary-label">Próximo mantenimiento</span>
+        <strong class="summary-value">
+          {{
+            asset.fecha_proximo_mantenimiento
+              ? (asset.fecha_proximo_mantenimiento | date: 'dd/MM/yyyy' : 'UTC')
+              : 'No programado'
+          }}
+        </strong>
+      </article>
+    </section>
+
+    <section class="asset-dashboard" aria-label="Hoja de vida del activo">
       <mat-card appearance="outlined" class="asset-card general-card">
         <mat-card-header>
           <div mat-card-avatar class="card-avatar">
@@ -59,7 +90,7 @@
               <mat-icon fontSet="material-symbols-outlined">image</mat-icon>
             </ng-template>
           </div>
-          <dl class="detail-list">
+          <dl class="property-list">
             <div>
               <dt>Inventario</dt>
               <dd>#{{ asset.numero_inventario }}</dd>
@@ -159,7 +190,7 @@
         </mat-card-header>
         <mat-card-content>
           <h3>Especificaciones eléctricas</h3>
-          <dl class="detail-list">
+          <dl class="property-list">
             <div>
               <dt>Voltaje</dt>
               <dd>{{ specification(asset.especificaciones_electricas?.voltaje) }}</dd>
@@ -202,7 +233,7 @@
             </div>
           </dl>
           <h3>Dimensiones</h3>
-          <dl class="detail-list">
+          <dl class="property-list">
             <div>
               <dt>Peso</dt>
               <dd>
@@ -279,7 +310,7 @@
           </button>
         </mat-card-header>
         <mat-card-content>
-          <dl class="detail-list">
+          <dl class="property-list">
             <div>
               <dt>Empresa</dt>
               <dd>{{ specification(asset.sede?.empresa) }}</dd>
@@ -330,7 +361,7 @@
           </button>
         </mat-card-header>
         <mat-card-content>
-          <dl class="detail-list">
+          <dl class="property-list">
             <div>
               <dt>Requiere calibración</dt>
               <dd>{{ asset.requiere_calibracion ? 'Sí' : 'No' }}</dd>
@@ -356,7 +387,11 @@
             </div>
             <div>
               <dt>Frecuencia mantenimiento</dt>
-              <dd>{{ specification(asset.frecuencia_mantenimiento) }}</dd>
+              <dd>{{ maintenanceFrequencyLabel(asset.frecuencia_mantenimiento_meses) }}</dd>
+            </div>
+            <div>
+              <dt>Meses programados</dt>
+              <dd>{{ maintenanceMonthsLabel(asset.meses_programados) }}</dd>
             </div>
             <div>
               <dt>Próximo mantenimiento</dt>
@@ -410,7 +445,7 @@
         </mat-card-header>
         <mat-card-content>
           <ng-container *ngIf="asset.proveedor; else noSupplier">
-            <dl class="detail-list">
+            <dl class="property-list">
               <div>
                 <dt>Nombre</dt>
                 <dd>{{ asset.proveedor.nombre }}</dd>
@@ -474,7 +509,6 @@
               <h3>{{ maintenanceTypeLabel(event.tipo) }}</h3>
               <p>{{ event.descripcion }}</p>
               <span class="muted">
-                {{ event.proveedor?.nombre || 'Sin proveedor' }}
                 <span *ngIf="event.costo !== null"> · {{ event.costo | number: '1.2-2' }}</span>
                 <span *ngIf="event.proxima_fecha">
                   · Próxima: {{ event.proxima_fecha | date: 'dd/MM/yyyy' : 'UTC' }}</span

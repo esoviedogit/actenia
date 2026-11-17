@@ -253,11 +253,23 @@
     <fieldset>
       <legend><span>04</span> Mantenimiento y cumplimiento</legend>
       <div class="field-grid">
-        <label
-          >Frecuencia de mantenimiento<input
-            formControlName="frecuencia_mantenimiento"
-            placeholder="Ej. TRIMESTRAL"
-        /></label>
+        <mat-form-field appearance="outline" class="maintenance-months-field">
+          <mat-label>Meses programados para mantenimiento preventivo</mat-label>
+          <mat-select formControlName="meses_programados" multiple>
+            <mat-option *ngFor="let month of maintenanceMonths" [value]="month.value">
+              {{ month.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="maintenance-frequency-field">
+          <mat-label>Frecuencia de mantenimiento</mat-label>
+          <mat-select formControlName="frecuencia_mantenimiento_meses">
+            <mat-option [value]="null">Sin frecuencia definida</mat-option>
+            <mat-option *ngFor="let frequency of maintenanceFrequencies" [value]="frequency.months">
+              {{ frequency.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
         <label
           >Próximo mantenimiento<input type="date" formControlName="fecha_proximo_mantenimiento"
         /></label>

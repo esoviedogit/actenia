@@ -28,6 +28,9 @@ import { SedeService } from '../../services/sede.service';
 import { Ubicacion } from '../../models/ubicacion.model';
 import { UbicacionService } from '../../services/ubicacion.service';
 import { EquipmentType } from '../../models/equipment-type.model';
+import { maintenanceFrequencyLabel as getMaintenanceFrequencyLabel } from '../../models/maintenance-frequency.model';
+import { MAINTENANCE_MONTHS, maintenanceMonthsLabel } from '../../models/maintenance-month.model';
+import { AuthService } from '../../services/auth.service';
 import {
   EquipmentDialogSection,
   EquipmentEditSection,
@@ -62,6 +65,9 @@ export class EquipmentDetailComponent implements OnInit {
   readonly loadingLocations = signal(false);
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
+  readonly maintenanceFrequencyLabel = getMaintenanceFrequencyLabel;
+  readonly maintenanceMonths = MAINTENANCE_MONTHS;
+  readonly maintenanceMonthsLabel = maintenanceMonthsLabel;
   readonly generalForm: FormGroup;
   readonly technicalForm: FormGroup;
   readonly locationForm: FormGroup;
@@ -75,6 +81,7 @@ export class EquipmentDetailComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly equipmentService: EquipmentService,
     private readonly maintenanceService: EquipmentMaintenanceService,
+    private readonly authService: AuthService,
     private readonly equipmentImageService: EquipmentImageService,
     private readonly equipmentTypeService: EquipmentTypeService,
     private readonly proveedorService: ProveedorService,
@@ -126,7 +133,8 @@ export class EquipmentDetailComponent implements OnInit {
       consultorio_id: ['', Validators.required],
     });
     this.maintenancePlanForm = this.fb.group({
-      frecuencia_mantenimiento: [''],
+      frecuencia_mantenimiento_meses: [null as number | null],
+      meses_programados: this.fb.nonNullable.control<string[]>([]),
       fecha_proximo_mantenimiento: [''],
       requiere_calibracion: [false],
       frecuencia_calibracion: [''],
@@ -146,7 +154,6 @@ export class EquipmentDetailComponent implements OnInit {
       tipo: ['MANTENIMIENTO_PREVENTIVO' as EquipmentMaintenanceType, Validators.required],
       fecha: [new Date().toISOString().slice(0, 10), Validators.required],
       proxima_fecha: [''],
-      proveedor_id: [''],
       costo: [null as number | null, [Validators.min(0)]],
       descripcion: ['', [Validators.required, Validators.maxLength(2000)]],
     });
@@ -244,7 +251,8 @@ export class EquipmentDetailComponent implements OnInit {
         break;
       case 'maintenance':
         this.maintenancePlanForm.reset({
-          frecuencia_mantenimiento: equipment.frecuencia_mantenimiento ?? '',
+          frecuencia_mantenimiento_meses: equipment.frecuencia_mantenimiento_meses ?? null,
+          meses_programados: equipment.meses_programados ?? [],
           fecha_proximo_mantenimiento: equipment.fecha_proximo_mantenimiento ?? '',
           requiere_calibracion: equipment.requiere_calibracion,
           frecuencia_calibracion: equipment.frecuencia_calibracion ?? '',
@@ -339,18 +347,34 @@ export class EquipmentDetailComponent implements OnInit {
     }
   }
 
-  openMaintenanceForm(): void {
+  async openMaintenanceForm(): Promise<void> {
     const equipment = this.equipment();
+    if (!equipment) return;
+
     this.successMessage.set('');
-    this.maintenanceForm.reset({
-      tipo: 'MANTENIMIENTO_PREVENTIVO',
-      fecha: new Date().toISOString().slice(0, 10),
-      proxima_fecha: '',
-      proveedor_id: equipment?.proveedor_id ?? '',
-      costo: null,
-      descripcion: '',
-    });
-    this.openDialog('maintenance-entry');
+    this.errorMessage.set('');
+    try {
+      const user = await this.authService.getCurrentUser();
+      if (!user) throw new Error('Debes iniciar sesión para registrar una intervención.');
+      const metadataName = user.user_metadata['full_name'] ?? user.user_metadata['name'];
+      const recordedBy =
+        typeof metadataName === 'string' && metadataName.trim()
+          ? metadataName.trim()
+          : (user.email ?? 'Usuario autenticado');
+
+      this.maintenanceForm.reset({
+        tipo: 'MANTENIMIENTO_PREVENTIVO',
+        fecha: new Date().toISOString().slice(0, 10),
+        proxima_fecha: '',
+        costo: null,
+        descripcion: '',
+      });
+      this.openDialog('maintenance-entry', recordedBy);
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'No fue posible identificar al usuario actual.',
+      );
+    }
   }
 
   async onMaintenanceSubmit(): Promise<void> {
@@ -366,7 +390,6 @@ export class EquipmentDetailComponent implements OnInit {
         tipo: value.tipo as EquipmentMaintenanceType,
         fecha: value.fecha,
         proxima_fecha: value.proxima_fecha || null,
-        proveedor_id: value.proveedor_id || null,
         costo: value.costo === null || value.costo === '' ? null : Number(value.costo),
         descripcion: value.descripcion,
       });
@@ -478,7 +501,12 @@ export class EquipmentDetailComponent implements OnInit {
         };
       case 'maintenance':
         return {
-          frecuencia_mantenimiento: this.nullIfBlank(value.frecuencia_mantenimiento),
+          frecuencia_mantenimiento_meses:
+            value.frecuencia_mantenimiento_meses === '' ||
+            value.frecuencia_mantenimiento_meses === null
+              ? null
+              : Number(value.frecuencia_mantenimiento_meses),
+          meses_programados: value.meses_programados ?? [],
           fecha_proximo_mantenimiento: this.nullIfBlank(value.fecha_proximo_mantenimiento),
           requiere_calibracion: value.requiere_calibracion,
           frecuencia_calibracion: this.nullIfBlank(value.frecuencia_calibracion),
@@ -559,7 +587,7 @@ export class EquipmentDetailComponent implements OnInit {
     return normalized || null;
   }
 
-  private openDialog(section: EquipmentDialogSection): void {
+  private openDialog(section: EquipmentDialogSection, recordedBy?: string): void {
     const form = section === 'maintenance-entry' ? this.maintenanceForm : this.formFor(section);
     this.dialog.open(EquipmentSectionDialogComponent, {
       width: 'min(760px, calc(100vw - 32px))',
@@ -568,6 +596,7 @@ export class EquipmentDetailComponent implements OnInit {
       data: {
         section,
         form,
+        recordedBy: recordedBy ?? '',
         equipmentTypes: this.equipmentTypes(),
         providers: this.providers(),
         sedes: this.sedes(),

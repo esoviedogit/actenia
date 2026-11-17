@@ -44,7 +44,8 @@ export interface EquipmentRecord {
   dimensiones: EquipmentDimensions | null;
   requiere_calibracion: boolean;
   frecuencia_calibracion: string | null;
-  frecuencia_mantenimiento: string | null;
+  frecuencia_mantenimiento_meses: number | null;
+  meses_programados?: string[];
   fecha_proximo_mantenimiento: string | null;
   fecha_proxima_calibracion: string | null;
   observaciones: string | null;
@@ -85,6 +86,18 @@ export interface EquipmentRecord {
   } | null;
 }
 
+export interface EquipmentScheduleRecord {
+  id: string;
+  nombre: string;
+  numero_inventario: string;
+  fecha_adquisicion: string | null;
+  meses_programados: string[] | null;
+  sede: {
+    id: string;
+    nombre: string;
+  } | null;
+}
+
 export interface EquipmentPayload {
   nombre: string;
   numero_inventario: string;
@@ -106,7 +119,8 @@ export interface EquipmentPayload {
   dimensiones: EquipmentDimensions;
   requiere_calibracion: boolean;
   frecuencia_calibracion: string | null;
-  frecuencia_mantenimiento: string | null;
+  frecuencia_mantenimiento_meses: number | null;
+  meses_programados?: string[];
   fecha_proximo_mantenimiento: string | null;
   fecha_proxima_calibracion: string | null;
   observaciones: string | null;
@@ -140,7 +154,8 @@ export interface Equipment {
   dimensiones?: EquipmentDimensions;
   requiere_calibracion?: boolean;
   frecuencia_calibracion?: string | null;
-  frecuencia_mantenimiento?: string | null;
+  frecuencia_mantenimiento_meses?: number | null;
+  meses_programados?: string[];
   observaciones?: string | null;
   manual_usuario_url?: string | null;
   qr_code_url?: string | null;

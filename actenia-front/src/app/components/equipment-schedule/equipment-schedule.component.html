@@ -1,0 +1,144 @@
+<main class="schedule-page">
+  <header class="schedule-header">
+    <div>
+      <p class="eyebrow">MANTENIMIENTO PREVENTIVO</p>
+      <h1>Cronograma anual</h1>
+      <p class="subtitle">Planificación y seguimiento de mantenimientos por equipo.</p>
+    </div>
+    <mat-form-field appearance="outline" class="year-select">
+      <mat-label>Año</mat-label>
+      <mat-select [value]="selectedYear()" (selectionChange)="onYearChange($event.value)">
+        <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </header>
+
+  <nav class="month-navigation" aria-label="Filtrar cronograma por mes">
+    <mat-chip-listbox
+      [value]="selectedMonth()"
+      (change)="onMonthChange($event.value)"
+      aria-label="Selecciona un mes para filtrar los equipos programados"
+    >
+      <mat-chip-option [value]="null">Año completo</mat-chip-option>
+      <mat-chip-option *ngFor="let month of months" [value]="month.value">
+        {{ month.label }}
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </nav>
+
+  <section class="schedule-summary" aria-label="Resumen del cronograma">
+    <span
+      ><strong>{{ eligibleEquipment().length }}</strong> equipos</span
+    >
+    <span
+      ><strong>{{ scheduledCount() }}</strong> mantenimientos programados</span
+    >
+    <span
+      ><strong>{{ completedCount() }}</strong> realizados</span
+    >
+    <span
+      ><strong>{{ pendingCount() }}</strong> pendientes</span
+    >
+  </section>
+
+  <p *ngIf="errorMessage()" class="schedule-error" role="alert">{{ errorMessage() }}</p>
+  <div *ngIf="loading()" class="loading-state" aria-live="polite">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Cargando cronograma...</span>
+  </div>
+
+  <section *ngIf="!loading()" aria-label="Matriz anual de mantenimientos">
+    <div *ngIf="eligibleEquipment().length === 0" class="empty-state">
+      <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">inventory_2</mat-icon>
+      <p>No hay equipos registrados para este usuario.</p>
+    </div>
+
+    <div
+      *ngIf="eligibleEquipment().length > 0 && visibleRows().length === 0"
+      class="empty-state"
+      aria-live="polite"
+    >
+      <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">event_busy</mat-icon>
+      <p>No hay equipos programados para {{ selectedMonth() | lowercase }} {{ selectedYear() }}.</p>
+    </div>
+
+    <div *ngIf="visibleRows().length > 0" class="table-scroll" tabindex="0">
+      <table
+        mat-table
+        [dataSource]="visibleRows()"
+        [trackBy]="trackEquipment"
+        class="schedule-table"
+        [class.month-view]="selectedMonth() !== null"
+        aria-label="Cronograma anual por equipo y mes"
+      >
+        <ng-container matColumnDef="equipment" sticky>
+          <th mat-header-cell *matHeaderCellDef class="equipment-column">Equipo</th>
+          <td mat-cell *matCellDef="let row" class="equipment-column">
+            <div class="equipment-info">
+              <a [routerLink]="['/equipment-detail', row.equipment.id]">
+                {{ row.equipment.nombre }}
+              </a>
+              <span>Inv. {{ row.equipment.numero_inventario || '—' }}</span>
+              <span>{{ row.equipment.sede?.nombre || 'Sin sede' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container *ngFor="let month of visibleMonths()" [matColumnDef]="month.value">
+          <th mat-header-cell *matHeaderCellDef class="month-column">{{ month.label }}</th>
+          <td mat-cell *matCellDef="let row" class="month-column">
+            <ng-container *ngIf="row.cells.get(month.value) as cell">
+              <ng-container *ngIf="cell.executions.length > 0; else noExecution">
+                <div
+                  *ngFor="let execution of cell.executions"
+                  class="execution-cell"
+                  [attr.aria-label]="
+                    maintenanceTypeLabel(execution) +
+                    ', realizada el ' +
+                    maintenanceDateLabel(execution.fecha)
+                  "
+                >
+                  <span class="completed-badge">
+                    <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">
+                      check_circle
+                    </mat-icon>
+                    {{ maintenanceTypeLabel(execution) }}
+                  </span>
+                  <time [attr.datetime]="maintenanceDateTime(execution.fecha)">
+                    {{ maintenanceDateLabel(execution.fecha) }}
+                  </time>
+                </div>
+              </ng-container>
+              <ng-template #noExecution>
+                <ng-container *ngIf="cell.scheduled; else notScheduled">
+                  <div class="pending-cell">
+                    <span class="pending-indicator">Pendiente</span>
+                    <button
+                      mat-button
+                      color="primary"
+                      type="button"
+                      class="record-button"
+                      [disabled]="maintenanceTypes().length === 0"
+                      [attr.aria-label]="
+                        'Registrar mantenimiento de ' + row.equipment.nombre + ' en ' + month.label
+                      "
+                      (click)="openExecutionDialog(row.equipment, month)"
+                    >
+                      Registrar
+                    </button>
+                  </div>
+                </ng-container>
+                <ng-template #notScheduled>
+                  <span class="not-scheduled" aria-label="No programado">—</span>
+                </ng-template>
+              </ng-template>
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()" class="schedule-row"></tr>
+      </table>
+    </div>
+  </section>
+</main>

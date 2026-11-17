@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+mat-dialog-content {
+  min-width: min(520px, calc(100vw - 64px));
+}
+
+.history-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.dialog-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff0ef;
+  color: #a63d38;
+  font-size: 13px;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 12px 24px 20px;
+}
+
+@media (max-width: 600px) {
+  .history-form {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+}

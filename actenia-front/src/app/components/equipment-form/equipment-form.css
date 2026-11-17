@@ -127,6 +127,11 @@ textarea {
   font: inherit;
   font-size: 13px;
 }
+
+.maintenance-frequency-field,
+.maintenance-months-field {
+  width: 100%;
+}
 textarea {
   resize: vertical;
 }

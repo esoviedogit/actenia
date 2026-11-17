@@ -1,0 +1,164 @@
+<main class="history-page">
+  <header class="history-header">
+    <div>
+      <p class="eyebrow">MANTENIMIENTO</p>
+      <h1>Historial de intervenciones</h1>
+      <p class="subtitle">Consulta, filtra y administra los mantenimientos de tus equipos.</p>
+    </div>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openForm()"
+      [disabled]="equipments().length === 0 || maintenanceTypes().length === 0"
+    >
+      <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+      Nuevo
+    </button>
+  </header>
+
+  <section class="filter-panel" aria-label="Filtros del historial">
+    <mat-form-field appearance="outline">
+      <mat-label>Número de inventario</mat-label>
+      <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
+      <input
+        matInput
+        type="search"
+        [value]="inventorySearch()"
+        (input)="onInventoryInput($event)"
+        placeholder="Buscar inventario"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de mantenimiento</mat-label>
+      <mat-select [value]="selectedType()" (selectionChange)="onTypeChange($event.value)">
+        <mat-option value="ALL">Todos los tipos</mat-option>
+        <mat-option *ngFor="let type of maintenanceTypes()" [value]="type.id">
+          {{ type.nombre }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Desde</mat-label>
+      <input matInput type="date" [value]="dateFrom()" (change)="onDateFromChange($event)" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Hasta</mat-label>
+      <input matInput type="date" [value]="dateTo()" (change)="onDateToChange($event)" />
+    </mat-form-field>
+
+    <button mat-button type="button" class="clear-filters" (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+  </section>
+
+  <p *ngIf="invalidDateRange()" class="filter-error" role="alert">
+    La fecha inicial debe ser anterior o igual a la fecha final.
+  </p>
+  <p *ngIf="errorMessage()" class="history-error" role="alert">{{ errorMessage() }}</p>
+
+  <div *ngIf="loading()" class="loading-state" aria-live="polite">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Cargando historial...</span>
+  </div>
+
+  <section *ngIf="!loading()" aria-label="Registros de mantenimiento">
+    <div *ngIf="histories().length === 0 && !errorMessage()" class="empty-state">
+      <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">history</mat-icon>
+      <p>Aún no hay intervenciones registradas.</p>
+      <span>Usa “Nuevo” para registrar la primera intervención.</span>
+    </div>
+
+    <div
+      *ngIf="histories().length > 0 && filteredHistories().length === 0"
+      class="empty-state compact-empty"
+      aria-live="polite"
+    >
+      <p>No hay intervenciones que coincidan con los filtros.</p>
+    </div>
+
+    <div *ngIf="filteredHistories().length > 0" class="table-scroll" tabindex="0">
+      <table
+        mat-table
+        [dataSource]="filteredHistories()"
+        [trackBy]="trackHistory"
+        class="history-table"
+        aria-label="Historial global de mantenimiento"
+      >
+        <ng-container matColumnDef="inventory">
+          <th mat-header-cell *matHeaderCellDef># Inventario</th>
+          <td mat-cell *matCellDef="let record">
+            {{ record.equipo?.numero_inventario || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="equipment">
+          <th mat-header-cell *matHeaderCellDef>Equipo</th>
+          <td mat-cell *matCellDef="let record" class="equipment-cell">
+            {{ record.equipo?.nombre || 'Equipo no disponible' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Fecha de mantenimiento</th>
+          <td mat-cell *matCellDef="let record">
+            <time [attr.datetime]="record.fecha">
+              {{ record.fecha | date: 'dd-MM-yyyy' : 'UTC' }}
+            </time>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let record">
+            <span class="type-badge">{{ typeLabel(record) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="activity">
+          <th mat-header-cell *matHeaderCellDef>Actividades realizadas</th>
+          <td mat-cell *matCellDef="let record" class="activity-cell">
+            {{ record.observaciones || record.descripcion || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="responsible">
+          <th mat-header-cell *matHeaderCellDef>Responsable / Usuario</th>
+          <td mat-cell *matCellDef="let record">{{ record.responsable }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-heading">Acciones</th>
+          <td mat-cell *matCellDef="let record" class="actions-cell">
+            <button
+              mat-icon-button
+              type="button"
+              [attr.aria-label]="'Editar intervención de ' + (record.equipo?.nombre || 'equipo')"
+              (click)="openForm(record)"
+            >
+              <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              [disabled]="deletingId() === record.id"
+              [attr.aria-label]="'Eliminar intervención de ' + (record.equipo?.nombre || 'equipo')"
+              (click)="deleteHistory(record)"
+            >
+              <mat-icon fontSet="material-symbols-outlined">
+                {{ deletingId() === record.id ? 'hourglass_top' : 'delete' }}
+              </mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="history-row"></tr>
+      </table>
+    </div>
+  </section>
+</main>

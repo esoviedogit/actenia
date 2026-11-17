@@ -5,14 +5,19 @@ import {
   EquipmentCatalogs,
   EquipmentPayload,
   EquipmentRecord,
+  EquipmentScheduleRecord,
 } from '../models/equipment.model';
+import { EquipmentImageService } from './equipment-image.service';
 
 const EQUIPMENT_RELATIONS =
   '*, sede:sedes(id,nombre,empresa,direccion,ciudad,telefono,codigo_habilitacion), ubicacion:consultorios(id,nombre,piso,codigo_servicio), proveedor:proveedores(id,nombre,direccion,telefono_fijo,telefono_celular,email,sitio_web), tipo_equipo:tipos_equipo(id,nombre,imagen_url,clasificacion_riesgo,frecuencia_mantenimiento_meses)';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly equipmentImageService: EquipmentImageService,
+  ) {}
 
   async list(): Promise<EquipmentRecord[]> {
     const userId = await this.requireUserId();
@@ -24,6 +29,20 @@ export class EquipmentService {
 
     if (error) throw error;
     return (data ?? []) as unknown as EquipmentRecord[];
+  }
+
+  async listForSchedule(): Promise<EquipmentScheduleRecord[]> {
+    const userId = await this.requireUserId();
+    const { data, error } = await this.supabase.client
+      .from('equipos')
+      .select(
+        'id,nombre,numero_inventario,fecha_adquisicion,meses_programados,sede:sedes(id,nombre)',
+      )
+      .eq('user_id', userId)
+      .order('numero_inventario');
+
+    if (error) throw error;
+    return (data ?? []) as unknown as EquipmentScheduleRecord[];
   }
 
   async getById(id: string): Promise<EquipmentRecord> {
@@ -85,7 +104,8 @@ export class EquipmentService {
         dimensiones: equipment.dimensiones ?? undefined,
         requiere_calibracion: equipment.requiere_calibracion ?? false,
         frecuencia_calibracion: equipment.frecuencia_calibracion?.trim() || null,
-        frecuencia_mantenimiento: equipment.frecuencia_mantenimiento?.trim() || null,
+        frecuencia_mantenimiento_meses: equipment.frecuencia_mantenimiento_meses ?? null,
+        meses_programados: equipment.meses_programados ?? [],
         fecha_proximo_mantenimiento: equipment.fecha_mantenimiento || null,
         fecha_proxima_calibracion: equipment.fecha_calibracion || null,
         observaciones: equipment.observaciones?.trim() || null,
@@ -135,6 +155,18 @@ export class EquipmentService {
 
   async delete(id: string): Promise<void> {
     const userId = await this.requireUserId();
+    const { data: equipment, error: lookupError } = await this.supabase.client
+      .from('equipos')
+      .select('imagen_url')
+      .eq('user_id', userId)
+      .eq('id', id)
+      .single();
+
+    if (lookupError) throw lookupError;
+    if (equipment.imagen_url) {
+      await this.equipmentImageService.remove(equipment.imagen_url);
+    }
+
     const { error } = await this.supabase.client
       .from('equipos')
       .delete()

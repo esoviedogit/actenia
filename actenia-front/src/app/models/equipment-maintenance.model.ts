@@ -8,11 +8,9 @@ export interface EquipmentMaintenance {
   tipo: EquipmentMaintenanceType;
   fecha: string;
   descripcion: string;
-  proveedor_id: string | null;
   costo: number | null;
   proxima_fecha: string | null;
   created_at: string;
-  proveedor?: { id: string; nombre: string } | null;
 }
 
 export interface EquipmentMaintenancePayload {
@@ -20,7 +18,6 @@ export interface EquipmentMaintenancePayload {
   tipo: EquipmentMaintenanceType;
   fecha: string;
   descripcion: string;
-  proveedor_id?: string | null;
   costo?: number | null;
   proxima_fecha?: string | null;
 }

@@ -45,5 +45,6 @@ describe('EquipmentMaintenanceService', () => {
         costo: 150000,
       }),
     );
+    expect(query.insert.mock.calls[0][0]).not.toHaveProperty('proveedor_id');
   });
 });

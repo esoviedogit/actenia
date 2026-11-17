@@ -62,33 +62,17 @@
           >
         </label>
 
-        <label>
-          Frecuencia de mantenimiento (meses) <b>*</b>
-          <input
-            type="number"
-            formControlName="frecuencia_mantenimiento_meses"
-            min="1"
-            step="1"
-            placeholder="Ej. 6"
-          />
-          <small
-            *ngIf="
-              form.get('frecuencia_mantenimiento_meses')?.touched &&
-              form.get('frecuencia_mantenimiento_meses')?.hasError('required')
-            "
-            class="field-error"
-            >La frecuencia de mantenimiento es obligatoria.</small
-          >
-          <small
-            *ngIf="
-              form.get('frecuencia_mantenimiento_meses')?.touched &&
-              (form.get('frecuencia_mantenimiento_meses')?.hasError('min') ||
-                form.get('frecuencia_mantenimiento_meses')?.hasError('pattern'))
-            "
-            class="field-error"
-            >Ingresa un número entero de meses mayor que cero.</small
-          >
-        </label>
+        <mat-form-field appearance="outline" class="frequency-field">
+          <mat-label>Frecuencia de mantenimiento</mat-label>
+          <mat-select formControlName="frecuencia_mantenimiento_meses" required>
+            <mat-option *ngFor="let frequency of maintenanceFrequencies" [value]="frequency.months">
+              {{ frequency.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('frecuencia_mantenimiento_meses')?.hasError('required')">
+            La frecuencia de mantenimiento es obligatoria.
+          </mat-error>
+        </mat-form-field>
 
         <label class="image-field">
           Imagen de referencia

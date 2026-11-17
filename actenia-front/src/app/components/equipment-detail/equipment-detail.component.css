@@ -1,9 +1,10 @@
 :host {
   display: block;
+  color: #233740;
 }
 
 .detail-page {
-  width: min(100% - 48px, 1440px);
+  width: min(100% - 48px, 1520px);
   margin: 0 auto;
   padding: 28px 0 56px;
 }
@@ -17,7 +18,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #147d73;
+  color: #087f75;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -43,7 +44,7 @@
 
 .eyebrow {
   margin: 0 0 5px;
-  color: #147d73;
+  color: #087f75;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -58,13 +59,48 @@ h1 {
 
 .subtitle {
   margin: 8px 0 0;
-  color: #687b83;
+  color: #647780;
   font-size: 13px;
 }
 
-.detail-grid {
+.summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.summary-tile {
+  display: grid;
+  min-width: 0;
+  min-height: 92px;
+  align-content: center;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid #e1e9e9;
+  border-left: 3px solid #16877d;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgb(26 56 65 / 4%);
+}
+
+.summary-label {
+  color: #61747c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-value {
+  overflow-wrap: anywhere;
+  color: #213b44;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.asset-dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: start;
   gap: 18px;
 }
@@ -72,20 +108,41 @@ h1 {
 .asset-card,
 .history-card {
   min-width: 0;
-  border-color: #e2e9eb;
+  border-color: #e1e9e9;
   border-radius: 14px;
-  box-shadow: 0 5px 22px rgb(26 56 65 / 5%);
+  background: #fff;
+  box-shadow: 0 4px 18px rgb(26 56 65 / 5%);
+}
+
+.general-card {
+  grid-column: span 7;
+}
+
+.technical-card {
+  grid-column: span 5;
+}
+
+.location-card {
+  grid-column: span 5;
+}
+
+.maintenance-card {
+  grid-column: span 7;
+}
+
+.provider-card {
+  grid-column: 1 / -1;
 }
 
 .asset-card mat-card-header,
 .history-card mat-card-header {
   align-items: flex-start;
-  padding: 18px 18px 12px;
+  padding: 18px 20px 12px;
 }
 
 .asset-card mat-card-content,
 .history-card mat-card-content {
-  padding: 0 18px 18px;
+  padding: 0 20px 20px;
 }
 
 .asset-card mat-card-title,
@@ -98,7 +155,7 @@ h1 {
 .asset-card mat-card-subtitle,
 .history-card mat-card-subtitle {
   margin-top: 4px;
-  color: #75868d;
+  color: #6f8188;
   font-size: 12px;
 }
 
@@ -106,8 +163,8 @@ h1 {
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: #eaf5f3;
-  color: #147d73;
+  background: #e9f5f3;
+  color: #087f75;
 }
 
 .card-avatar mat-icon {
@@ -118,7 +175,7 @@ h1 {
 
 .edit-button {
   margin: -4px -8px 0 auto;
-  color: #147d73;
+  color: #087f75;
 }
 
 .asset-image {
@@ -127,9 +184,9 @@ h1 {
   margin: 0 0 17px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #e8edef;
+  border: 1px solid #e6eded;
   border-radius: 10px;
-  background: #f7fafb;
+  background: #f7f9fa;
 }
 
 .asset-image img {
@@ -141,38 +198,37 @@ h1 {
 .asset-image mat-icon {
   width: 48px;
   height: 48px;
-  color: #9aabad;
+  color: #93a4a8;
   font-size: 48px;
 }
 
-.detail-list {
+.property-list {
   display: grid;
   gap: 11px;
   margin: 0;
 }
 
-.detail-list > div {
+.property-list > div {
   display: grid;
-  grid-template-columns: minmax(96px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(100px, 0.9fr) minmax(0, 1.1fr);
   align-items: start;
-  gap: 10px;
+  gap: 12px;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
-.detail-list dt {
+.property-list dt {
   color: #5b6d74;
   font-weight: 600;
 }
 
-.detail-list dd {
+.property-list dd {
   min-width: 0;
   margin: 0;
   color: #293f48;
   overflow-wrap: anywhere;
 }
 
-.detail-list h3,
 .asset-card h3 {
   margin: 18px 0 11px;
   color: #3c535d;
@@ -197,13 +253,13 @@ h1 {
 .status-maintenance,
 .alert-soon {
   background: #fff3d8;
-  color: #93630c;
+  color: #855a08;
 }
 
 .status-retired,
 .alert-overdue {
   background: #fde9e8;
-  color: #b5413b;
+  color: #a83732;
 }
 
 .alert-chip {
@@ -229,7 +285,7 @@ h1 {
 }
 
 .history-card {
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 .history-list {
@@ -245,7 +301,7 @@ h1 {
 }
 
 .history-date {
-  color: #147d73;
+  color: #087f75;
   font-size: 12px;
   font-weight: 700;
 }
@@ -265,7 +321,7 @@ h1 {
 
 .muted,
 .empty-state {
-  color: #73828a;
+  color: #6f7f86;
   font-size: 12px;
 }
 
@@ -301,30 +357,121 @@ h1 {
   color: #147d73;
 }
 
-@media (max-width: 1050px) {
-  .detail-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.back-link:focus-visible,
+.external-link:focus-visible,
+.property-list a:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #087f75;
+  outline-offset: 3px;
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .detail-page {
+    width: min(100% - 40px, 1320px);
+  }
+
+  .asset-dashboard {
+    gap: 16px;
   }
 }
 
-@media (max-width: 680px) {
+@media (min-width: 768px) and (max-width: 1199px) {
   .detail-page {
-    width: min(100% - 28px, 1440px);
-    padding-top: 18px;
+    width: min(100% - 40px, 1080px);
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .asset-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .general-card,
+  .technical-card,
+  .provider-card {
+    grid-column: 1 / -1;
+  }
+
+  .location-card,
+  .maintenance-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .detail-page {
+    width: min(100% - 28px, 640px);
+    padding: 18px 0 36px;
+  }
+
+  .page-header {
+    margin-bottom: 18px;
   }
 
   .header-content {
     align-items: flex-start;
     flex-direction: column;
+    gap: 14px;
   }
 
-  .detail-grid {
-    grid-template-columns: 1fr;
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .summary-tile {
+    min-height: 82px;
+    padding: 13px;
+  }
+
+  .summary-value {
+    font-size: 15px;
+  }
+
+  .asset-dashboard {
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
+  }
+
+  .general-card,
+  .technical-card,
+  .location-card,
+  .maintenance-card,
+  .provider-card {
+    grid-column: 1;
+  }
+
+  .asset-card mat-card-header,
+  .history-card mat-card-header {
+    padding: 16px 16px 10px;
+  }
+
+  .asset-card mat-card-content,
+  .history-card mat-card-content {
+    padding: 0 16px 16px;
+  }
+
+  .property-list > div {
+    grid-template-columns: minmax(92px, 0.85fr) minmax(0, 1.15fr);
+    gap: 10px;
   }
 
   .history-entry {
     grid-template-columns: 1fr;
     gap: 7px;
+  }
+
+  .history-card {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .summary-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
